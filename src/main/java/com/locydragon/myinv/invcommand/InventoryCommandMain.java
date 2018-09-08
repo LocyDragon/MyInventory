@@ -10,6 +10,10 @@ import org.bukkit.command.CommandSender;
 public class InventoryCommandMain implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+		if (args.length <= 0) {
+			sender.sendMessage("§3[MyInventory] §e请输入正确的指令!");
+			return false;
+		}
 		SubCommandInfo info = new SubCommandInfo();
 		info.args = args;
 		info.command = command;

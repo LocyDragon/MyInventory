@@ -10,11 +10,12 @@ import java.util.regex.Pattern;
  */
 public class ItemStackUtil {
 	public static boolean isEmpty(ItemStack item) {
-		return item == null || item.getType() == Material.AIR || !item.hasItemMeta();
+		return item == null || item.getType() == Material.AIR;
 	}
 
 	public static boolean equals(ItemStack one, ItemStack two) {
-		return one.isSimilar(two) && one.getAmount() == two.getAmount();
+		return one.getType() == two.getType() && one.getAmount() == two.getAmount() && one.getItemMeta().equals(two.getItemMeta())
+				&& one.getDurability() == two.getDurability();
 	}
 
 	public static boolean isInteger(String str) {

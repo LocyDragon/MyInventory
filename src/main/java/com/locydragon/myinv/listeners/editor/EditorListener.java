@@ -32,6 +32,7 @@ public class EditorListener implements Listener {
 		if (EditorStacks.editorHashMap.containsKey(e.getPlayer())) {
 			Inventory inventory = e.getInventory();
 			Editor editor = EditorStacks.editorHashMap.get(e.getPlayer());
+			EditorStacks.editorHashMap.remove(e.getPlayer());
 			Menu targetMenu = editor.menu;
 			int index = editor.index;
 			FrameMenu frameMenu = new FrameMenu(targetMenu);

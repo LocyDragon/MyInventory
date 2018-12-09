@@ -6,6 +6,7 @@ import com.locydragon.myinv.core.MenuStacks;
 import com.locydragon.myinv.core.data.Editor;
 import com.locydragon.myinv.invcommand.SubCmdRunner;
 import com.locydragon.myinv.invcommand.SubCommandInfo;
+import com.locydragon.myinv.util.InventorySerialization;
 import com.locydragon.myinv.util.ItemStackUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
@@ -40,11 +41,11 @@ public class CommandFramesInventory implements SubCmdRunner {
 			int frameIndex = Integer.valueOf(frame);
 			Inventory targetFrame = null;
 			if (targetMenu.hasFrame(frameIndex)) {
-				targetFrame = targetMenu.getFrame(frameIndex).getInventory();
+				targetFrame = InventorySerialization.cloneInventory(targetMenu.getFrame(frameIndex).getInventory());
 			} else if (targetMenu.isEmpty()) {
 				targetFrame = Bukkit.createInventory(null, targetMenu.getSize(), targetMenu.getTitle());
 			} else {
-				targetFrame = targetMenu.getFrame(targetMenu.getFramesSize() - 1).getInventory();
+				targetFrame = InventorySerialization.cloneInventory(targetMenu.getFrame(targetMenu.getFramesSize() - 1).getInventory());
 			}
 			Editor editor = new Editor();
 			editor.editor = info.sender;

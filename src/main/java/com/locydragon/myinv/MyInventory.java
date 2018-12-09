@@ -25,11 +25,11 @@ public class MyInventory extends JavaPlugin {
 
 	@Override
 	public void onEnable() { //当插件被加载时
+		instance = this;
 		Main.registerCommands();
 		Main.infoMessage();
 		MyInventory.getInstance().saveDefaultConfig();
 		config = MyInventory.getInstance().getConfig();
-		instance = this;
 		period = MyInventory.getSettings().getDouble("period");
 		Bukkit.getPluginManager().registerEvents(new InventoryProtectListener(), this);
 		Bukkit.getPluginManager().registerEvents(new ClickParamSender(), this);

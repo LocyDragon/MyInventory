@@ -6,12 +6,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 /**
  * @author LocyDragon
  */
-public class Menu implements Cloneable,Iterable {
+public class Menu implements Serializable {
 	private List<FrameMenu> frames = new ArrayList<>();
 	private String fatherTitle = "";
 	private int index = 0;
@@ -33,11 +32,11 @@ public class Menu implements Cloneable,Iterable {
 	}
 
 	public FrameMenu nextFrame() {
+		FrameMenu menu = frames.get(index);
+		index++;
 		if (index >= frames.size()) {
 			index = 0;
 		}
-		FrameMenu menu = frames.get(index);
-		index++;
 		this.extended = menu;
 		return menu;
 	}
@@ -58,27 +57,11 @@ public class Menu implements Cloneable,Iterable {
 		return this.frames.size();
 	}
 
+	@Deprecated
 	public Menu deepClone() {
-		return (Menu)deepClone(this);
-	}
-
-	private Object deepClone(Object src){
-		Object o = null;
-		try{
-			if (src != null){
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ObjectOutputStream oos = new ObjectOutputStream(baos);
-				oos.writeObject(src);
-				oos.close();
-				ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-				ObjectInputStream ois = new ObjectInputStream(bais);
-				o = ois.readObject();
-				ois.close();
-			}
-		} catch (IOException | ClassNotFoundException e){
-			e.printStackTrace();
-		}
-		return o;
+		Menu newMenu = new Menu(this.fatherTitle, this.size, this.menuName);
+		newMenu.frames = this.frames;
+		return newMenu;
 	}
 
 	public void save() {
@@ -109,11 +92,6 @@ public class Menu implements Cloneable,Iterable {
 		this.frames.add(menu);
 	}
 
-	@Override
-	public Iterator<FrameMenu> iterator() {
-		return this.frames.iterator();
-	}
-
 	public boolean hasFrame(int frame) {
 		return frame < this.frames.size();
 	}
@@ -128,5 +106,9 @@ public class Menu implements Cloneable,Iterable {
 		} else {
 			this.frames.add(frameMenu);
 		}
+	}
+
+	public List<FrameMenu> framesList() {
+		return frames;
 	}
 }

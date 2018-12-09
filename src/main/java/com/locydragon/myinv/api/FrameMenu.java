@@ -7,16 +7,18 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.Serializable;
+import java.util.UUID;
+
 
 /**
  * @author LocyDragon
  */
-public class FrameMenu {
-	private Menu father;
+public class FrameMenu implements Serializable {
+	private UUID uuid = UUID.randomUUID();
 	private Inventory menu;
 	private static final ItemStack NULL_ITEM = new ItemStack(Material.AIR);
 	public FrameMenu(Menu father) {
-		this.father = father;
 		menu = Bukkit.createInventory(null, father.getSize(), father.getTitle());
 	}
 
@@ -26,7 +28,14 @@ public class FrameMenu {
 
 	public Inventory getInventory() { return this.menu; }
 
-	public void setInventory(Inventory inv) { this.menu = inv; }
+	public void setInventory(Inventory inv) {
+		for (int i = 0;i < inv.getSize();i++) {
+			if (inv.getItem(i) == null || inv.getItem(i).getType() == Material.AIR) {
+				continue;
+			}
+			this.menu.setItem(i, inv.getItem(i));
+		}
+	}
 
 	public void findDifferenceAndSet(InventoryView beforeView) {
 		Inventory before = beforeView.getTopInventory();
@@ -40,11 +49,11 @@ public class FrameMenu {
 				continue;
 			}
 			if (ItemStackUtil.isEmpty(beforeItem) && !ItemStackUtil.isEmpty(menuItem)) {
-				before.setItem(i, menuItem);
+				beforeView.setItem(i, menuItem);
 			} else if (!ItemStackUtil.isEmpty(beforeItem) && ItemStackUtil.isEmpty(menuItem)) {
-				before.setItem(i, NULL_ITEM);
+				beforeView.setItem(i, NULL_ITEM);
 			} else if (!ItemStackUtil.equals(beforeItem, menuItem)) {
-				before.setItem(i, menuItem);
+				beforeView.setItem(i, menuItem);
 			}
 		}
 	}

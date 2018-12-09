@@ -24,4 +24,14 @@ public class InventorySerialization {
 		}
 		return inventory;
 	}
+
+	public static Inventory cloneInventory(Inventory target) {
+		Inventory inv = Bukkit.createInventory(null, target.getSize(), target.getTitle());
+		for (int i = 0;i < target.getSize();i++) {
+			if (target.getItem(i) != null && target.getItem(i).getType() != Material.AIR) {
+				inv.setItem(i, target.getItem(i));
+			}
+		}
+		return inv;
+	}
 }

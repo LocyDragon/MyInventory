@@ -4,6 +4,7 @@ import com.locydragon.myinv.api.FrameMenu;
 import com.locydragon.myinv.api.Menu;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;

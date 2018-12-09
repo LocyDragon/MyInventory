@@ -1,9 +1,9 @@
 package com.locydragon.myinv.api;
 
 import com.locydragon.myinv.MyInventory;
+import com.locydragon.myinv.util.InventorySerialization;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.scheduler.BukkitTask;
 import java.util.HashMap;
 
@@ -16,13 +16,12 @@ public class AnimatedFramePlayer {
 			who.openInventory(menu.getFrame(0).getInventory());
 		} else {
 			BukkitTask task = Bukkit.getScheduler().runTaskTimer(MyInventory.getInstance(), () -> {
-				InventoryView view = null;
 				FrameMenu extended = menu.getExtended();
 				FrameMenu next = menu.nextFrame();
 				if (extended == null) {
-					view = who.openInventory(next.getInventory());
+					who.openInventory(InventorySerialization.cloneInventory(next.getInventory()));
 				} else {
-					next.findDifferenceAndSet(view);
+					next.findDifferenceAndSet(who.getOpenInventory());
 					who.updateInventory();
 				}
 			},0L, (long)(MyInventory.period * 20));

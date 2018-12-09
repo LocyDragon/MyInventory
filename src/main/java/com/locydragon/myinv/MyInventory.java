@@ -4,6 +4,7 @@ import com.locydragon.myinv.core.MenuStacks;
 import com.locydragon.myinv.invcommand.SubCommandBasic;
 import com.locydragon.myinv.invcommand.subcmd.CommandCreateInventory;
 import com.locydragon.myinv.invcommand.subcmd.CommandFramesInventory;
+import com.locydragon.myinv.invcommand.subcmd.CommandOpenInventory;
 import com.locydragon.myinv.listeners.ClickParamSender;
 import com.locydragon.myinv.listeners.InventoryProtectListener;
 import com.locydragon.myinv.listeners.editor.EditorListener;
@@ -38,6 +39,7 @@ public class MyInventory extends JavaPlugin {
 		getLogger().info("加载完成了!");
 		SubCommandBasic.addListener(new CommandCreateInventory());
 		SubCommandBasic.addListener(new CommandFramesInventory());
+		SubCommandBasic.addListener(new CommandOpenInventory());
 	}
 
 	public static MyInventory getInstance() { //获取实例对象

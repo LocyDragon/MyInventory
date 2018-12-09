@@ -3,6 +3,7 @@ package com.locydragon.myinv.invcommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * @author Administrator
@@ -10,14 +11,14 @@ import org.bukkit.command.CommandSender;
 public class InventoryCommandMain implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-		if (args.length <= 0) {
+		if (args.length <= 0 || !(sender instanceof Player)) {
 			sender.sendMessage("§3[MyInventory] §e请输入正确的指令!");
 			return false;
 		}
 		SubCommandInfo info = new SubCommandInfo();
 		info.args = args;
 		info.command = command;
-		info.sender = sender;
+		info.sender = (Player)sender;
 		info.s = s;
 		SubCommandBasic.invoke(info);
 		return false;

@@ -2,13 +2,14 @@ package com.locydragon.myinv.invcommand;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * @author Administrator
  */
 public class SubCommandInfo {
 	public String[] args;
-	public CommandSender sender;
+	public Player sender;
 	public Command command;
 	public String s;
 

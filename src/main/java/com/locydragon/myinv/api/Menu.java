@@ -8,13 +8,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
-
 /**
  * @author LocyDragon
  */
 public class Menu implements Cloneable,Iterable {
-	public List<FrameMenu> frames = new ArrayList<>();
+	private List<FrameMenu> frames = new ArrayList<>();
 	private String fatherTitle = "";
 	private int index = 0;
 	private int size = 9;
@@ -60,8 +58,8 @@ public class Menu implements Cloneable,Iterable {
 		return this.frames.size();
 	}
 
-	public Object deepClone() {
-		return deepClone(this);
+	public Menu deepClone() {
+		return (Menu)deepClone(this);
 	}
 
 	private Object deepClone(Object src){
@@ -114,5 +112,21 @@ public class Menu implements Cloneable,Iterable {
 	@Override
 	public Iterator<FrameMenu> iterator() {
 		return this.frames.iterator();
+	}
+
+	public boolean hasFrame(int frame) {
+		return frame < this.frames.size();
+	}
+
+	public boolean isEmpty() {
+		return this.frames.isEmpty();
+	}
+
+	public void insertFrame(int index, FrameMenu frameMenu) {
+		if (hasFrame(index)) {
+			this.frames.set(index, frameMenu);
+		} else {
+			this.frames.add(frameMenu);
+		}
 	}
 }

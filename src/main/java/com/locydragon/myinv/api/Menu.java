@@ -1,20 +1,29 @@
 package com.locydragon.myinv.api;
 
+import com.locydragon.myinv.util.MenuOutputStream;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author LocyDragon
  */
-public class Menu {
+public class Menu implements Cloneable,Iterable {
 	public List<FrameMenu> frames = new ArrayList<>();
 	private String fatherTitle = "";
 	private int index = 0;
 	private int size = 9;
 	private FrameMenu extended = null;
-	public Menu(String fatherTitle, int size) {
+	private String menuName;
+	public Menu(String fatherTitle, int size, String menuName) {
 		this.fatherTitle = fatherTitle;
 		this.size = size;
+		this.menuName = menuName;
 	}
 
 	public String getTitle() {
@@ -49,5 +58,61 @@ public class Menu {
 
 	public int getFramesSize() {
 		return this.frames.size();
+	}
+
+	public Object deepClone() {
+		return deepClone(this);
+	}
+
+	private Object deepClone(Object src){
+		Object o = null;
+		try{
+			if (src != null){
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ObjectOutputStream oos = new ObjectOutputStream(baos);
+				oos.writeObject(src);
+				oos.close();
+				ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+				ObjectInputStream ois = new ObjectInputStream(bais);
+				o = ois.readObject();
+				ois.close();
+			}
+		} catch (IOException | ClassNotFoundException e){
+			e.printStackTrace();
+		}
+		return o;
+	}
+
+	public void save() {
+		File outputFile = new File(".//plugins//MyInventory//Gui//"+this.menuName+".yml");
+		if (!outputFile.exists()) {
+			outputFile.getParentFile().mkdirs();
+			try {
+				outputFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		FileConfiguration configuration = YamlConfiguration.loadConfiguration(outputFile);
+		MenuOutputStream.saveTo(configuration, this, outputFile);
+	}
+
+	public static Menu forName(String menuName) {
+		File outputFile = new File(".//plugins//MyInventory//Gui//"+menuName+".yml");
+		FileConfiguration configuration = YamlConfiguration.loadConfiguration(outputFile);
+		return MenuOutputStream.load(configuration, menuName);
+	}
+
+	public String getMenuName() {
+		return menuName;
+	}
+
+	public void addFrame(FrameMenu menu) {
+		this.frames.add(menu);
+	}
+
+	@Override
+	public Iterator<FrameMenu> iterator() {
+		return this.frames.iterator();
 	}
 }

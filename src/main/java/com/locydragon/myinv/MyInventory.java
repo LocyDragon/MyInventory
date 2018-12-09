@@ -1,5 +1,8 @@
 package com.locydragon.myinv;
 
+import com.locydragon.myinv.listeners.ClickParamSender;
+import com.locydragon.myinv.listeners.InventoryProtectListener;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,6 +15,7 @@ import java.io.IOException;
 public class MyInventory extends JavaPlugin {
 	private static MyInventory instance;
 	public static FileConfiguration config;
+	public static Double period = 0.5;
 
 	@Override
 	public void onEnable() { //当插件被加载时
@@ -20,7 +24,9 @@ public class MyInventory extends JavaPlugin {
 		MyInventory.getInstance().saveDefaultConfig();
 		config = MyInventory.getInstance().getConfig();
 		instance = this;
-		//我 赋 值 我 自 己
+		period = MyInventory.getSettings().getDouble("period");
+		Bukkit.getPluginManager().registerEvents(new InventoryProtectListener(), this);
+		Bukkit.getPluginManager().registerEvents(new ClickParamSender(), this);
 	}
 
 	public static MyInventory getInstance() { //获取实例对象

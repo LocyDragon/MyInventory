@@ -26,7 +26,7 @@ public class CommandCreateInventory implements SubCmdRunner {
 	public void onSubCommand(SubCommandInfo info) {
 		if (info.args[0].equalsIgnoreCase(COMMAND_Prefix) && info.sender.isOp()) {
 			if (info.args.length != LENGTH_EXPECT) {
-				info.sender.sendMessage("§3[MyInventory] §e请使用/miv create [Gui界面名称] [界面行数] [Title名称] ——创建一个新的Gui界面模板!");
+				info.sender.sendMessage("§3[MyInventory] §e请使用/miv create [Gui界面名称] [界面格子数] [Title名称] ——创建一个新的Gui界面模板!");
 				return;
 			}
 			Menu expectMenu = MyInventoryAPI.getMenu(info.args[1]);
@@ -35,7 +35,7 @@ public class CommandCreateInventory implements SubCmdRunner {
 				return;
 			}
 			if (!ItemStackUtil.isInteger(info.args[2])) {
-				info.sender.sendMessage("§3[MyInventory] §c你所输入的行数不是一个数字!");
+				info.sender.sendMessage("§3[MyInventory] §c你所输入的格子数不是一个数字!");
 				return;
 			}
 			Integer number = Integer.valueOf(info.args[2]);

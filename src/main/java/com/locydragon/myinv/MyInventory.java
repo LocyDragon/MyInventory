@@ -8,6 +8,7 @@ import com.locydragon.myinv.invcommand.subcmd.CommandOpenInventory;
 import com.locydragon.myinv.listeners.ClickParamSender;
 import com.locydragon.myinv.listeners.InventoryProtectListener;
 import com.locydragon.myinv.listeners.editor.EditorListener;
+import com.locydragon.myinv.metrics.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,6 +41,7 @@ public class MyInventory extends JavaPlugin {
 		SubCommandBasic.addListener(new CommandCreateInventory());
 		SubCommandBasic.addListener(new CommandFramesInventory());
 		SubCommandBasic.addListener(new CommandOpenInventory());
+		new Metrics(this);
 	}
 
 	public static MyInventory getInstance() { //获取实例对象

@@ -46,7 +46,7 @@ public class CommandCreateInventory implements SubCmdRunner {
 			Menu newMenu = new Menu(ChatColor.translateAlternateColorCodes('&', info.args[3]), number, info.args[1]);
 			newMenu.save();
 			MenuStacks.insert(newMenu);
-			info.sender.sendMessage("§3[MyInventory] §c创建完成了!现在使用/miv frame [Gui界面名称] [帧数(从0开始)] ——来编辑帧吧~");
+			info.sender.sendMessage("§3[MyInventory] §c创建完成了!现在使用/miv frame "+info.args[1]+" [帧数(从0开始)] ——来编辑帧吧~");
 		}
 	}
 }

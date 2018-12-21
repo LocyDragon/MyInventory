@@ -15,10 +15,17 @@ import java.io.IOException;
 public class MenuOutputStream {
 	public static final String TITLE_PATH = "Output.Title";
 	public static final String SIZE_PATH = "Output.Size";
+	public static final String MUSIC_PATH = "Output.Music";
+	public static final String EMPTY_MUSIC = "EMPTY_MUSIC";
 	public static final String FRAME = "FRAME_";
 	public static void saveTo(FileConfiguration configuration, Menu menu, File targetFile) {
 		configuration.set(TITLE_PATH, menu.getTitle());
 		configuration.set(SIZE_PATH, menu.getSize());
+		if (menu.hasMusic()) {
+			configuration.set(MUSIC_PATH, menu.getMusicName());
+		} else {
+			configuration.set(MUSIC_PATH, EMPTY_MUSIC);
+		}
 		for (int i = 0;i < menu.getFramesSize();i++) {
 			FrameMenu frameMenu = menu.getFrame(i);
 			configuration.set(FRAME + i + ".Exist", true);
@@ -41,6 +48,9 @@ public class MenuOutputStream {
 			Inventory targetInventory = InventorySerialization.deSerialization(config, FRAME + i, menu.getSize(), menu.getTitle());
 			frameMenu.setInventory(targetInventory);
 			menu.addFrame(frameMenu);
+		}
+		if (!config.getString(MUSIC_PATH, EMPTY_MUSIC).equals(EMPTY_MUSIC)) {
+			menu.setMusicName(config.getString(MUSIC_PATH));
 		}
 		return menu;
 	}

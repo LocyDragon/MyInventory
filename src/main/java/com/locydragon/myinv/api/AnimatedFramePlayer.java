@@ -1,6 +1,7 @@
 package com.locydragon.myinv.api;
 
 import com.locydragon.myinv.MyInventory;
+import com.locydragon.myinv.core.audio.AudioPlayerOut;
 import com.locydragon.myinv.util.InventorySerialization;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -9,7 +10,11 @@ import java.util.HashMap;
 
 public class AnimatedFramePlayer {
 	public static HashMap<Player,BukkitTask> playerList = new HashMap<>();
+
 	public static void playFor(Player who, Menu menu) {
+		if (menu.hasMusic()) {
+			AudioPlayerOut.playFor(who, menu.getMusicName());
+		}
 		if (menu.getFramesSize() <= 0) {
 			who.openInventory(Bukkit.createInventory(null, menu.getSize(), menu.getTitle()));
 		} else if (menu.getFramesSize() == 1) {
@@ -21,7 +26,7 @@ public class AnimatedFramePlayer {
 				if (extended == null) {
 					who.openInventory(InventorySerialization.cloneInventory(next.getInventory()));
 				} else {
-					next.findDifferenceAndSet(who.getOpenInventory());
+					next.findDifferenceAndSet(who.getOpenInventory(), who);
 					who.updateInventory();
 				}
 			},0L, (long)(MyInventory.period * 20));

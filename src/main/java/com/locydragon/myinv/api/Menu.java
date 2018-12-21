@@ -1,5 +1,6 @@
 package com.locydragon.myinv.api;
 
+import com.locydragon.myinv.util.InventorySerialization;
 import com.locydragon.myinv.util.MenuOutputStream;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -17,10 +18,23 @@ public class Menu implements Serializable {
 	private int size = 9;
 	private FrameMenu extended = null;
 	private String menuName;
+	private String musicName;
 	public Menu(String fatherTitle, int size, String menuName) {
 		this.fatherTitle = fatherTitle;
 		this.size = size;
 		this.menuName = menuName;
+	}
+
+	public void setMusicName(String musicName) {
+		this.musicName = musicName;
+	}
+
+	public String getMusicName() {
+		return this.musicName;
+	}
+
+	public boolean hasMusic() {
+		return this.musicName != null;
 	}
 
 	public String getTitle() {
@@ -57,10 +71,18 @@ public class Menu implements Serializable {
 		return this.frames.size();
 	}
 
-	@Deprecated
 	public Menu deepClone() {
 		Menu newMenu = new Menu(this.fatherTitle, this.size, this.menuName);
-		newMenu.frames = this.frames;
+		List<FrameMenu> frames = new ArrayList<>();
+		for (FrameMenu frameEach : this.frames) {
+			FrameMenu frameMenu = new FrameMenu(newMenu);
+			frameMenu.setInventory(InventorySerialization.cloneInventory(frameEach.getInventory()));
+			frames.add(frameMenu);
+		}
+		newMenu.frames = frames;
+		if (hasMusic()) {
+			newMenu.setMusicName(this.musicName);
+		}
 		return newMenu;
 	}
 

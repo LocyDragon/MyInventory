@@ -1,6 +1,7 @@
 package com.locydragon.myinv.invcommand.subcmd;
 
 import com.locydragon.myinv.api.Menu;
+import com.locydragon.myinv.api.MyInventoryAPI;
 import com.locydragon.myinv.core.EditorStacks;
 import com.locydragon.myinv.core.MenuStacks;
 import com.locydragon.myinv.core.data.Editor;
@@ -29,7 +30,7 @@ public class CommandFramesInventory implements SubCmdRunner {
 			}
 			String uiName = info.args[1];
 			String frame = info.args[2];
-			Menu targetMenu = MenuStacks.getMenuCloned(uiName);
+			Menu targetMenu = MyInventoryAPI.getMenu(uiName);
 			if (targetMenu == null) {
 				info.sender.sendMessage("§3[MyInventory] §c目标UI界面不存在.");
 				return;

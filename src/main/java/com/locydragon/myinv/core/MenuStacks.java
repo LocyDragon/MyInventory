@@ -3,7 +3,9 @@ package com.locydragon.myinv.core;
 import com.locydragon.myinv.api.Menu;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author LocyDragon
@@ -32,5 +34,9 @@ public class MenuStacks {
 
 	public static void insert(Menu menu) {
 		menuMap.put(menu.getMenuName(), menu);
+	}
+
+	public static List<String> menuList() {
+		return new ArrayList<>(menuMap.keySet());
 	}
 }

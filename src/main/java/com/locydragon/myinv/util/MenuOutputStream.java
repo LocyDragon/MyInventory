@@ -16,6 +16,7 @@ public class MenuOutputStream {
 	public static final String TITLE_PATH = "Output.Title";
 	public static final String SIZE_PATH = "Output.Size";
 	public static final String MUSIC_PATH = "Output.Music";
+	public static final String PERIOD_PATH = "Output.Period";
 	public static final String EMPTY_MUSIC = "EMPTY_MUSIC";
 	public static final String FRAME = "FRAME_";
 	public static void saveTo(FileConfiguration configuration, Menu menu, File targetFile) {
@@ -25,6 +26,11 @@ public class MenuOutputStream {
 			configuration.set(MUSIC_PATH, menu.getMusicName());
 		} else {
 			configuration.set(MUSIC_PATH, EMPTY_MUSIC);
+		}
+		if (menu.wasSettedPeriod()) {
+			configuration.set(PERIOD_PATH, menu.getPeriod());
+		} else {
+			configuration.set(PERIOD_PATH, -1.0);
 		}
 		for (int i = 0;i < menu.getFramesSize();i++) {
 			FrameMenu frameMenu = menu.getFrame(i);
@@ -51,6 +57,9 @@ public class MenuOutputStream {
 		}
 		if (!config.getString(MUSIC_PATH, EMPTY_MUSIC).equals(EMPTY_MUSIC)) {
 			menu.setMusicName(config.getString(MUSIC_PATH));
+		}
+		if (config.getDouble(PERIOD_PATH, -1.0) != -1.0) {
+			menu.setPeriod(config.getDouble(PERIOD_PATH));
 		}
 		return menu;
 	}

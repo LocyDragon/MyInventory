@@ -29,7 +29,7 @@ public class AnimatedFramePlayer {
 					next.findDifferenceAndSet(who.getOpenInventory(), who);
 					who.updateInventory();
 				}
-			},0L, (long)(MyInventory.period * 20));
+			},0L, (long)(menu.getPeriod() * 20));
 			playerList.put(who, task);
 		}
 	}

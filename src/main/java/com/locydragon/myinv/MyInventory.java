@@ -3,10 +3,7 @@ package com.locydragon.myinv;
 
 import com.locydragon.myinv.core.MenuStacks;
 import com.locydragon.myinv.invcommand.SubCommandBasic;
-import com.locydragon.myinv.invcommand.subcmd.CommandBackMusicInventory;
-import com.locydragon.myinv.invcommand.subcmd.CommandCreateInventory;
-import com.locydragon.myinv.invcommand.subcmd.CommandFramesInventory;
-import com.locydragon.myinv.invcommand.subcmd.CommandOpenInventory;
+import com.locydragon.myinv.invcommand.subcmd.*;
 import com.locydragon.myinv.listeners.ClickParamSender;
 import com.locydragon.myinv.listeners.InventoryProtectListener;
 import com.locydragon.myinv.listeners.editor.EditorListener;
@@ -46,6 +43,9 @@ public class MyInventory extends JavaPlugin {
 		SubCommandBasic.addListener(new CommandFramesInventory());
 		SubCommandBasic.addListener(new CommandOpenInventory());
 		SubCommandBasic.addListener(new CommandBackMusicInventory());
+		SubCommandBasic.addListener(new CommandListInventory());
+		SubCommandBasic.addListener(new CommandInventoryInfoInventory());
+		SubCommandBasic.addListener(new CommandSetPeriodInventory());
 		new Metrics(this);
 		useAudioBuffer = Bukkit.getPluginManager().getPlugin("AudioBuffer") != null;
 		if (useAudioBuffer) {

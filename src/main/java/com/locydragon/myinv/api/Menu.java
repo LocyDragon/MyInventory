@@ -1,5 +1,6 @@
 package com.locydragon.myinv.api;
 
+import com.locydragon.myinv.MyInventory;
 import com.locydragon.myinv.util.InventorySerialization;
 import com.locydragon.myinv.util.MenuOutputStream;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -19,10 +20,12 @@ public class Menu implements Serializable {
 	private FrameMenu extended = null;
 	private String menuName;
 	private String musicName;
+	private double period;
 	public Menu(String fatherTitle, int size, String menuName) {
 		this.fatherTitle = fatherTitle;
 		this.size = size;
 		this.menuName = menuName;
+		this.period = MyInventory.period;
 	}
 
 	public void setMusicName(String musicName) {
@@ -83,6 +86,7 @@ public class Menu implements Serializable {
 		if (hasMusic()) {
 			newMenu.setMusicName(this.musicName);
 		}
+		newMenu.setPeriod(this.period);
 		return newMenu;
 	}
 
@@ -132,5 +136,17 @@ public class Menu implements Serializable {
 
 	public List<FrameMenu> framesList() {
 		return frames;
+	}
+
+	public double getPeriod() {
+		return this.period;
+	}
+
+	public void setPeriod(double period) {
+		this.period = period;
+	}
+
+	public boolean wasSettedPeriod() {
+		return this.period != MyInventory.period;
 	}
 }

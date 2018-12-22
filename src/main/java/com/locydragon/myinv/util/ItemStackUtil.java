@@ -22,4 +22,13 @@ public class ItemStackUtil {
 		Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
 		return pattern.matcher(str).matches();
 	}
+
+	public static boolean isDouble(String str) {
+		try {
+			Double.valueOf(str);
+			return true;
+		} catch (Exception exc) {
+			return false;
+		}
+	}
 }

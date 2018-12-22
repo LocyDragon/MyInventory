@@ -17,6 +17,7 @@ public class MenuOutputStream {
 	public static final String SIZE_PATH = "Output.Size";
 	public static final String MUSIC_PATH = "Output.Music";
 	public static final String PERIOD_PATH = "Output.Period";
+	public static final String LOOP_PATH = "Output.Loop";
 	public static final String EMPTY_MUSIC = "EMPTY_MUSIC";
 	public static final String FRAME = "FRAME_";
 	public static void saveTo(FileConfiguration configuration, Menu menu, File targetFile) {
@@ -32,6 +33,7 @@ public class MenuOutputStream {
 		} else {
 			configuration.set(PERIOD_PATH, -1.0);
 		}
+		configuration.set(LOOP_PATH, menu.isLoop());
 		for (int i = 0;i < menu.getFramesSize();i++) {
 			FrameMenu frameMenu = menu.getFrame(i);
 			configuration.set(FRAME + i + ".Exist", true);
@@ -61,6 +63,7 @@ public class MenuOutputStream {
 		if (config.getDouble(PERIOD_PATH, -1.0) != -1.0) {
 			menu.setPeriod(config.getDouble(PERIOD_PATH));
 		}
+		menu.setLooping(config.getBoolean(LOOP_PATH, true));
 		return menu;
 	}
 }

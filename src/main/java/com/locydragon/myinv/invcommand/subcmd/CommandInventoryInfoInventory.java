@@ -31,6 +31,7 @@ public class CommandInventoryInfoInventory implements SubCmdRunner {
 			info.sender.sendMessage(ChatColor.GREEN + "界面名称 "+ ChatColor.AQUA +"—— "+ChatColor.YELLOW+instance.getMenuName());
 			info.sender.sendMessage(ChatColor.GREEN + "界面帧数 "+ ChatColor.AQUA +"—— "+ChatColor.YELLOW+instance.getFramesSize());
 			info.sender.sendMessage(ChatColor.GREEN + "每帧间隔时长 "+ ChatColor.AQUA +"—— "+ChatColor.YELLOW+instance.getPeriod());
+			info.sender.sendMessage(ChatColor.GREEN + "是否循环播放(true-是/false-否) "+ ChatColor.AQUA +"—— "+ChatColor.YELLOW+instance.isLoop());
 			info.sender.sendMessage(ChatColor.GREEN + "背景音乐(需要AudioBuffer插件支持)" +
 					" "+ ChatColor.AQUA +"—— "+ChatColor.YELLOW+instance.getMusicName());
 			info.sender.sendMessage(ChatColor.GREEN + "界面格子数 "+ ChatColor.AQUA +"—— "+ChatColor.YELLOW+instance.getSize());

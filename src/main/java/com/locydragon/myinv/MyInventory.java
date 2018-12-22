@@ -46,6 +46,7 @@ public class MyInventory extends JavaPlugin {
 		SubCommandBasic.addListener(new CommandListInventory());
 		SubCommandBasic.addListener(new CommandInventoryInfoInventory());
 		SubCommandBasic.addListener(new CommandSetPeriodInventory());
+		SubCommandBasic.addListener(new CommandLoopInventory());
 		new Metrics(this);
 		useAudioBuffer = Bukkit.getPluginManager().getPlugin("AudioBuffer") != null;
 		if (useAudioBuffer) {

@@ -21,6 +21,7 @@ public class Menu implements Serializable {
 	private String menuName;
 	private String musicName;
 	private double period;
+	private boolean loop = true;
 	public Menu(String fatherTitle, int size, String menuName) {
 		this.fatherTitle = fatherTitle;
 		this.size = size;
@@ -52,7 +53,11 @@ public class Menu implements Serializable {
 		FrameMenu menu = frames.get(index);
 		index++;
 		if (index >= frames.size()) {
-			index = 0;
+			if (loop) {
+				index = 0;
+			} else {
+				index = frames.size() - 1;
+			}
 		}
 		this.extended = menu;
 		return menu;
@@ -87,6 +92,7 @@ public class Menu implements Serializable {
 			newMenu.setMusicName(this.musicName);
 		}
 		newMenu.setPeriod(this.period);
+		newMenu.setLooping(this.loop);
 		return newMenu;
 	}
 
@@ -148,5 +154,13 @@ public class Menu implements Serializable {
 
 	public boolean wasSettedPeriod() {
 		return this.period != MyInventory.period;
+	}
+
+	public void setLooping(boolean isLoop) {
+		this.loop = isLoop;
+	}
+
+	public boolean isLoop() {
+		return this.loop;
 	}
 }

@@ -45,7 +45,8 @@ public class InventoryCommandMain implements CommandExecutor {
 					}
 				}
 			}
-			info.sender.sendMessage("§3[MyInventory] §c你是想输入命令: §e§l/miv "+entryList.get(0).getValue()+" §c吗?");
+			info.sender.sendMessage("§3[MyInventory] §c你是想输入命令: §e§l/miv "
+					+entryList.get(entryList.size() - 1).getValue()+" §c吗?");
 		}
 		return false;
 	}

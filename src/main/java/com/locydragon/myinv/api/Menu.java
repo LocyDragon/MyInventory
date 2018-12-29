@@ -49,6 +49,10 @@ public class Menu implements Serializable {
 		this.fatherTitle = title;
 	}
 
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
 	public FrameMenu nextFrame() {
 		FrameMenu menu = frames.get(index);
 		index++;
@@ -162,5 +166,9 @@ public class Menu implements Serializable {
 
 	public boolean isLoop() {
 		return this.loop;
+	}
+
+	public int getFrameIndex() {
+		return this.index;
 	}
 }

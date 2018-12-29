@@ -26,7 +26,13 @@ public class MyInventory extends JavaPlugin {
 	public static boolean usePAPI = false;
 
 	@Override
-	public void onEnable() { //当插件被加载时
+	public void onLoad() {
+		getLogger().info(">> 欢迎使用,MyInventory!");
+		getLogger().info(">> 祝您使用愉快!");
+	}
+
+	@Override
+	public void onEnable() {
 		instance = this;
 		Main.registerCommands();
 		Main.infoMessage();
@@ -60,6 +66,15 @@ public class MyInventory extends JavaPlugin {
 		} else {
 			getLogger().info(">> 变量插件: PlaceholderAPI 不存在 挂钩失败.");
 		}
+	}
+
+	@Override
+	public void onDisable() {
+		getLogger().info(">> MyInventory插件关闭了...");
+		getLogger().info(">> 我们很感谢您的使用...");
+		getLogger().info(">> 作者QQ: 2424441676 ——绿毛");
+		getLogger().info(">> 欢迎来吐槽本插件~有bug加QQ反馈!");
+		getLogger().info(">> 插件指令: /myinv 和 /miv");
 	}
 
 	public static MyInventory getInstance() { //获取实例对象

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SlotScript {
 	public static ConcurrentLinkedQueue<String> waitingQueue = new ConcurrentLinkedQueue<>();
@@ -18,6 +20,12 @@ public class SlotScript {
 	private List<JobPerScript> scripts = new ArrayList<>();
 	private int slot;
 	protected Menu fatherMenu;
+
+	private static Pattern CHANCE_SELECT_PATTERN = null;
+	static {
+		CHANCE_SELECT_PATTERN = Pattern.compile("<chance:+\\S+>");
+	}
+
 	public SlotScript(int slot, Menu fatherMenu, List<String> input) {
 		this.slot = slot;
 		this.fatherMenu = fatherMenu;
@@ -30,6 +38,16 @@ public class SlotScript {
 	private SlotScript() {}
 
 	protected static void init(JobPerScript script, String param) {
+		Matcher matcherChance = CHANCE_SELECT_PATTERN.matcher(param);
+		if (matcherChance.find()) {
+			String chanceFindParam = matcherChance.group();
+			script.chance = Double.valueOf(chanceFindParam
+					.replace("<chance:", "").replace(">", ""));
+			if (script.chance > 100.0 || script.chance <= 0.0) {
+				script.chance = 100.0;
+			}
+			param = param.replace(chanceFindParam, "");
+		}
 
 	}
 
@@ -42,7 +60,7 @@ public class SlotScript {
 
 	public SlotScript deepClone() {
 		SlotScript newObject = new SlotScript();
-		HashMap<String,String> newStacks = new HashMap<String,String>();
+		HashMap<String,String> newStacks = new HashMap<>();
 		newStacks.putAll(this.placeHolderStacks);
 		newObject.placeHolderStacks = newStacks;
 		List<JobPerScript> newScript = new ArrayList<>();

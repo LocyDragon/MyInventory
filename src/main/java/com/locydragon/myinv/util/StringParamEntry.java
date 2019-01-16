@@ -25,4 +25,11 @@ public class StringParamEntry implements Map.Entry<Float,String> {
 		this.key = key;
 		return key;
 	}
+
+	public static boolean startsWithIgnoreCase(String string, String prefix) {
+		if (string.length() < prefix.length()) {
+			return false;
+		}
+		return string.regionMatches(true, 0, prefix, 0, prefix.length());
+	}
 }

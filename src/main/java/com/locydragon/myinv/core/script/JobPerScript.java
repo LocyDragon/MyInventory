@@ -1,5 +1,6 @@
 package com.locydragon.myinv.core.script;
 
+import com.avaje.ebean.validation.NotNull;
 import com.locydragon.myinv.MyInventory;
 import com.locydragon.myinv.api.AnimatedFramePlayer;
 import com.locydragon.myinv.api.Menu;
@@ -13,18 +14,19 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 
 public class JobPerScript {
-	protected JobCodeEnum job;
-	protected SlotScript father;
+	@NotNull protected JobCodeEnum job;
+	private SlotScript father;
 	private boolean done = true;
-	protected HashMap<String,Object> knownHash = new HashMap<>();
-	public static final String COMMAND_PREFIX = "COMMAND_NAME";
-	public static final String PLACEHOLDER_PARAM = "PLACEHOLDER";
-	public static final String TIME_OUT = "TIME_OUT";
+	@NotNull protected HashMap<String,Object> knownHash = new HashMap<>();
+	protected double chance = 100.0;
+	protected static final String COMMAND_PREFIX = "COMMAND_NAME";
+	protected static final String PLACEHOLDER_PARAM = "PLACEHOLDER";
+	protected static final String TIME_OUT = "TIME_OUT";
 	public String param;
 	public JobPerScript(SlotScript script, String param) {
 		this.father = script;
-		father.init(this, param);
 		this.param = param;
+		SlotScript.init(this, this.param);
 	}
 
 	public boolean isDone() {
@@ -33,6 +35,9 @@ public class JobPerScript {
 
 	public void run(Player user) {
 		if (this.job == null) {
+			return;
+		}
+		if (Math.random() * 100 + 1 >= chance) {
 			return;
 		}
 		Bukkit.getScheduler().runTask(MyInventory.getInstance(), () -> {

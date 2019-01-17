@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -15,6 +16,7 @@ public class InventoryProtectListener implements Listener {
 		if (AnimatedFramePlayer.playerList.containsKey(e.getPlayer())) {
 			AnimatedFramePlayer.playerList.get(e.getPlayer()).cancel();
 			AnimatedFramePlayer.playerList.remove(e.getPlayer());
+			AnimatedFramePlayer.openMenuTarget.remove(e.getPlayer());
 			AudioPlayerOut.stop((Player) e.getPlayer());
 		}
 	}
@@ -24,6 +26,7 @@ public class InventoryProtectListener implements Listener {
 		if (AnimatedFramePlayer.playerList.containsKey(e.getPlayer())) {
 			AnimatedFramePlayer.playerList.get(e.getPlayer()).cancel();
 			AnimatedFramePlayer.playerList.remove(e.getPlayer());
+			AnimatedFramePlayer.openMenuTarget.remove(e.getPlayer());
 		}
 	}
 
@@ -32,6 +35,19 @@ public class InventoryProtectListener implements Listener {
 		if (AnimatedFramePlayer.playerList.containsKey(e.getPlayer())) {
 			AnimatedFramePlayer.playerList.get(e.getPlayer()).cancel();
 			AnimatedFramePlayer.playerList.remove(e.getPlayer());
+			AnimatedFramePlayer.openMenuTarget.remove(e.getPlayer());
+		}
+	}
+
+	@EventHandler
+	public void onJoin(PlayerJoinEvent e) {
+		if (AnimatedFramePlayer.playerList.containsKey(e.getPlayer())) {
+			AnimatedFramePlayer.playerList.get(e.getPlayer()).cancel();
+			AnimatedFramePlayer.playerList.remove(e.getPlayer());
+			AnimatedFramePlayer.openMenuTarget.remove(e.getPlayer());
+		}
+		if (AnimatedFramePlayer.openMenuTarget.containsKey(e.getPlayer())) {
+			AnimatedFramePlayer.openMenuTarget.remove(e.getPlayer());
 		}
 	}
 }

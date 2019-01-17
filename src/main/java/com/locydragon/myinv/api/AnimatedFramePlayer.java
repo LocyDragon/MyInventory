@@ -1,6 +1,7 @@
 package com.locydragon.myinv.api;
 
 import com.locydragon.myinv.MyInventory;
+import com.locydragon.myinv.api.events.MenuOpenEvent;
 import com.locydragon.myinv.core.audio.AudioPlayerOut;
 import com.locydragon.myinv.util.InventorySerialization;
 import org.bukkit.Bukkit;
@@ -9,12 +10,15 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.HashMap;
 
 public class AnimatedFramePlayer {
-	public static HashMap<Player,BukkitTask> playerList = new HashMap<>();
 
+	public static HashMap<Player,BukkitTask> playerList = new HashMap<>();
+	public static HashMap<Player,Menu> openMenuTarget = new HashMap<>();
 	public static void playFor(Player who, Menu menu) {
+		Bukkit.getPluginManager().callEvent(new MenuOpenEvent(who, menu));
 		if (menu.hasMusic()) {
 			AudioPlayerOut.playFor(who, menu.getMusicName());
 		}
+		openMenuTarget.put(who, menu);
 		if (menu.getFramesSize() <= 0) {
 			who.openInventory(Bukkit.createInventory(null, menu.getSize(), menu.getTitle()));
 		} else if (menu.getFramesSize() == 1) {

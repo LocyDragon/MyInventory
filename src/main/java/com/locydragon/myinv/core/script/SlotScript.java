@@ -1,6 +1,7 @@
 package com.locydragon.myinv.core.script;
 
 import com.locydragon.myinv.api.Menu;
+import com.locydragon.myinv.util.StringParamEntry;
 import org.bukkit.entity.Player;
 
 
@@ -20,6 +21,11 @@ public class SlotScript {
 	private List<JobPerScript> scripts = new ArrayList<>();
 	private int slot;
 	protected Menu fatherMenu;
+
+	protected static final String PLAYER_CMD = "player";
+	protected static final String OP_CMD = "op";
+	protected static final String CONSOLE_CMD = "console";
+	protected static final String ASK = "ask";
 
 	private static Pattern CHANCE_SELECT_PATTERN = null;
 	static {
@@ -48,7 +54,29 @@ public class SlotScript {
 			}
 			param = param.replace(chanceFindParam, "");
 		}
-
+		String[] paramSplit = param.split(":", 2);
+		String type = paramSplit[0].trim();
+		String value = paramSplit[1].trim();
+		if (StringParamEntry.startsWithIgnoreCase(type, PLAYER_CMD)) {
+			script.job = JobCodeEnum.PLAYER_CMD;
+			script.knownHash.put(JobPerScript.COMMAND_PREFIX, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, OP_CMD)) {
+			script.job = JobCodeEnum.OP_CMD;
+			script.knownHash.put(JobPerScript.COMMAND_PREFIX, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, CONSOLE_CMD)) {
+			script.job = JobCodeEnum.CONSOLE_CMD;
+			script.knownHash.put(JobPerScript.COMMAND_PREFIX, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, ASK)) {
+			script.job = JobCodeEnum.ASK;
+			String[] params = value.split("\\|");
+			try {
+				long timeOut = Long.valueOf(params[1]);
+				script.knownHash.put(JobPerScript.TIME_OUT, timeOut);
+				script.knownHash.put(JobPerScript.PLACEHOLDER_PARAM, params[0]);
+			} catch (Exception e) {
+				return;
+			}
+		}
 	}
 
 	protected String parse(String input) {
@@ -60,12 +88,10 @@ public class SlotScript {
 
 	public SlotScript deepClone() {
 		SlotScript newObject = new SlotScript();
-		HashMap<String,String> newStacks = new HashMap<>();
-		newStacks.putAll(this.placeHolderStacks);
-		newObject.placeHolderStacks = newStacks;
+		newObject.placeHolderStacks = new HashMap<>();
 		List<JobPerScript> newScript = new ArrayList<>();
 		for (JobPerScript script : this.scripts) {
-			newScript.add(new JobPerScript(newObject, script.param));
+			newScript.add(script.clone());
 		}
 		newObject.scripts = newScript;
 		newObject.slot = this.slot;

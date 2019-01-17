@@ -29,6 +29,46 @@ public class JobPerScript {
 		SlotScript.init(this, this.param);
 	}
 
+	private JobPerScript() {}
+
+	public JobPerScript clone() {
+		JobPerScript newScript = new JobPerScript();
+		newScript.job = this.job;
+		newScript.done = true;
+		newScript.father = this.father;
+		HashMap<String,Object> newMap = new HashMap<>();
+		newMap.putAll(this.knownHash);
+		newScript.knownHash = newMap;
+		newScript.chance = this.chance;
+		newScript.param = this.param;
+		return newScript;
+	}
+
+	public String toString() {
+		StringBuilder out = new StringBuilder();
+		switch (this.job) {
+			case OP_CMD:
+				out.append(SlotScript.OP_CMD).append(":").
+						append(knownHash.get(COMMAND_PREFIX)).append("<chance:" + chance + ">");
+				break;
+			case PLAYER_CMD:
+				out.append(SlotScript.PLAYER_CMD).append(":").
+						append(knownHash.get(COMMAND_PREFIX)).append("<chance:" + chance + ">");
+				break;
+			case ASK:
+				out.append(SlotScript.ASK).append(":").append(knownHash.get(PLACEHOLDER_PARAM))
+						.append("|").append(knownHash.get(TIME_OUT)).append("<chance:" + chance + ">");
+				break;
+			case CONSOLE_CMD:
+				out.append(SlotScript.CONSOLE_CMD).append(":").append(":").
+						append(knownHash.get(COMMAND_PREFIX)).append("<chance:" + chance + ">");
+				break;
+			default:
+				return null;
+		}
+		return out.toString();
+	}
+
 	public boolean isDone() {
 		return done;
 	}

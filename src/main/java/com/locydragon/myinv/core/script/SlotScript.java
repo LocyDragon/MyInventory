@@ -91,7 +91,7 @@ public class SlotScript {
 
 	protected String parse(String input) {
 		for (HashMap.Entry<String,String> entry : this.placeHolderStacks.entrySet()) {
-			input.replace(entry.getKey(), entry.getValue());
+			input = input.replace(entry.getKey(), entry.getValue());
 		}
 		return input;
 	}
@@ -129,7 +129,6 @@ public class SlotScript {
 						e.printStackTrace();
 					}
 				}
-				System.out.println(script.job);
 			}
 			waitingQueue.remove(who.getName());
 		});

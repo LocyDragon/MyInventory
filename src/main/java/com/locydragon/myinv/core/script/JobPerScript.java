@@ -2,7 +2,9 @@ package com.locydragon.myinv.core.script;
 
 import com.avaje.ebean.validation.NotNull;
 import com.locydragon.myinv.MyInventory;
+import com.locydragon.myinv.api.AnimatedFramePlayer;
 import com.locydragon.myinv.api.Menu;
+import com.locydragon.myinv.api.MyInventoryAPI;
 import com.locydragon.myinv.reflectasm.PlaceHolderReflector;
 import org.bukkit.Bukkit;
 import org.bukkit.conversations.*;
@@ -127,34 +129,10 @@ public class JobPerScript {
 					done.set(false);
 					Conversation conversation = new ConversationFactory(MyInventory.getInstance())
 							.withTimeout((int)(long) knownHash.get(TIME_OUT))
-							.withFirstPrompt(new ConversationPrompt(this, user, (String)this.knownHash.get(MESSAGE)))
+							.withFirstPrompt(new ConversationPrompt(this, user, (String)this.knownHash.get(MESSAGE)
+							, fatherMenu, frameIndex))
 							.buildConversation(user);
 					conversation.begin();
-
-					/**
-					Conversation conversation = new Conversation(MyInventory.getInstance());
-					conversation.addRequest(new RequestString().newRequestString().setTimeout((long) knownHash.get(TIME_OUT)));
-					conversation.setOnCancel(con -> {
-						Bukkit.getLogger().info("cancel");
-						done = true;
-						if (con.getRequest(0) != null) {
-							father.placeHolderStacks.put((String) knownHash.get(PLACEHOLDER_PARAM), con.getRequest(0).toString());
-						}
-						Menu newMenu = MyInventoryAPI.getMenu(fatherMenu.getMenuName());
-						newMenu.setIndex(frameIndex);
-						AnimatedFramePlayer.playFor(user, fatherMenu);
-					});
-					conversation.setOnComplete(con -> {
-						Bukkit.getLogger().info("called");
-						done = true;
-						if (con.getRequest(0) != null) {
-							father.placeHolderStacks.put((String) knownHash.get(PLACEHOLDER_PARAM), con.getRequest(0).toString());
-						}
-						Menu newMenu = MyInventoryAPI.getMenu(fatherMenu.getMenuName());
-						newMenu.setIndex(frameIndex);
-						AnimatedFramePlayer.playFor(user, fatherMenu);
-					});
-					 **/
 					break;
 			}
 		});

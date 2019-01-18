@@ -2,12 +2,14 @@ package com.locydragon.myinv.core.script;
 
 import com.locydragon.myinv.api.Menu;
 import com.locydragon.myinv.util.StringParamEntry;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -17,10 +19,11 @@ import java.util.regex.Pattern;
 public class SlotScript {
 	public static ConcurrentLinkedQueue<String> waitingQueue = new ConcurrentLinkedQueue<>();
 	public static Executor threadPool = Executors.newCachedThreadPool();
-	protected HashMap<String,String> placeHolderStacks = new HashMap<>();
+	protected ConcurrentHashMap<String,String> placeHolderStacks = new ConcurrentHashMap<>();
 	private List<JobPerScript> scripts = new ArrayList<>();
 	private int slot;
 	protected Menu fatherMenu;
+	private List<String> scriptsString = new ArrayList<>();
 
 	protected static final String PLAYER_CMD = "player";
 	protected static final String OP_CMD = "op";
@@ -39,6 +42,11 @@ public class SlotScript {
 			JobPerScript scriptTarget = new JobPerScript(this, object);
 			scripts.add(scriptTarget);
 		}
+		this.scriptsString = input;
+	}
+
+	public List<String> getScripts() {
+		return this.scriptsString;
 	}
 
 	private SlotScript() {}
@@ -73,6 +81,8 @@ public class SlotScript {
 				long timeOut = Long.valueOf(params[1]);
 				script.knownHash.put(JobPerScript.TIME_OUT, timeOut);
 				script.knownHash.put(JobPerScript.PLACEHOLDER_PARAM, params[0]);
+				script.knownHash.put(JobPerScript.MESSAGE, ChatColor.translateAlternateColorCodes('&',
+						params[2]));
 			} catch (Exception e) {
 				return;
 			}
@@ -88,7 +98,7 @@ public class SlotScript {
 
 	public SlotScript deepClone() {
 		SlotScript newObject = new SlotScript();
-		newObject.placeHolderStacks = new HashMap<>();
+		newObject.placeHolderStacks = new ConcurrentHashMap<>();
 		List<JobPerScript> newScript = new ArrayList<>();
 		for (JobPerScript script : this.scripts) {
 			newScript.add(script.clone());
@@ -96,6 +106,7 @@ public class SlotScript {
 		newObject.scripts = newScript;
 		newObject.slot = this.slot;
 		newObject.fatherMenu = this.fatherMenu;
+		newObject.scriptsString = this.scriptsString;
 		return newObject;
 	}
 
@@ -109,9 +120,26 @@ public class SlotScript {
 		threadPool.execute(() -> {
 			waitingQueue.add(who.getName());
 			for (JobPerScript script : this.scripts) {
+				script.done.set(false);
 				script.run(who);
-				while (!script.isDone());
+				while (!script.isDone()) {
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				System.out.println(script.job);
 			}
+			waitingQueue.remove(who.getName());
 		});
+	}
+
+	public int getSlot() {
+		return this.slot;
+	}
+
+	public String getMenuName() {
+		return this.fatherMenu.getMenuName();
 	}
 }

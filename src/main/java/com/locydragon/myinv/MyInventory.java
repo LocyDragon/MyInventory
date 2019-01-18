@@ -2,6 +2,11 @@ package com.locydragon.myinv;
 
 
 import com.locydragon.myinv.core.MenuStacks;
+import com.locydragon.myinv.core.script.SlotScript;
+import com.locydragon.myinv.core.script.ache.SlotLabel;
+import com.locydragon.myinv.core.script.ache.SlotScriptAche;
+import com.locydragon.myinv.core.script.listener.SlotClickListener;
+import com.locydragon.myinv.core.script.loader.SlotScriptLoader;
 import com.locydragon.myinv.invcommand.SubCommandBasic;
 import com.locydragon.myinv.invcommand.subcmd.*;
 import com.locydragon.myinv.listeners.ClickParamSender;
@@ -14,6 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * @author LocyDragon
@@ -42,8 +48,10 @@ public class MyInventory extends JavaPlugin {
 		Bukkit.getPluginManager().registerEvents(new InventoryProtectListener(), this);
 		Bukkit.getPluginManager().registerEvents(new ClickParamSender(), this);
 		Bukkit.getPluginManager().registerEvents(new EditorListener(), this);
+		Bukkit.getPluginManager().registerEvents(new SlotClickListener(), this);
 		getLogger().info(">> 加载界面中...");
 		MenuStacks.load();
+		loadScripts();
 		getLogger().info(">> 加载完成了!");
 		SubCommandBasic.addListener(new CommandCreateInventory());
 		SubCommandBasic.addListener(new CommandFramesInventory());
@@ -91,5 +99,16 @@ public class MyInventory extends JavaPlugin {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void loadScripts() {
+		int amount = 0;
+		File folder = new File(".//plugins//MyInventory//Scripts//");
+		for (File scriptFile : folder.listFiles()) {
+			HashMap<SlotLabel,SlotScript> result = SlotScriptLoader.loadByFile(scriptFile);
+			amount += result.size();
+			SlotScriptAche.putAll(result);
+		}
+		MyInventory.getInstance().getLogger().info(">> 加载了 "+amount+" 个脚本!");
 	}
 }

@@ -8,6 +8,8 @@ public class MyInventoryAPI {
 		return MenuStacks.getMenuCloned(menuName);
 	}
 
+	public static boolean hasMenu(String menuName) { return getMenu(menuName) != null; }
+
 	public static boolean isOpening(Player who) { return AnimatedFramePlayer.playerList.containsKey(who); }
 
 	public static Menu getMenuOpening(Player who) {

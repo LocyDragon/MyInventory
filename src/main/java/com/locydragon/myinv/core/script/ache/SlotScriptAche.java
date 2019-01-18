@@ -13,6 +13,17 @@ public class SlotScriptAche {
 	}
 
 	public static SlotScript searchScript(String menuName, int slot) {
-		return scriptCache.get(new SlotLabel(slot, menuName));
+		SlotLabel label = new SlotLabel(slot, menuName);
+		SlotScript[] script = new SlotScript[] { null };
+		scriptCache.entrySet().parallelStream().forEach(x -> {
+			if (x.getKey().equals(label)) {
+				script[0] = x.getValue();
+			}
+		});
+		return script[0];
+	}
+
+	public static void putAll(HashMap<SlotLabel,SlotScript> map) {
+		scriptCache.putAll(map);
 	}
 }

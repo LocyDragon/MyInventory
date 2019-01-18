@@ -52,7 +52,7 @@ public class RequestString extends RequestBase<String>{
 		return Optional.of(result);
 	}
 	
-	private class RequestListener implements Listener{
+	private class RequestListener implements Listener {
 		@EventHandler(priority = EventPriority.LOWEST)
 		public void onChat(AsyncPlayerChatEvent event) {
 			if(!event.getPlayer().equals(getConversation().getPlayer()))

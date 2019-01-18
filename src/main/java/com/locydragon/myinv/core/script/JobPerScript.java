@@ -2,28 +2,28 @@ package com.locydragon.myinv.core.script;
 
 import com.avaje.ebean.validation.NotNull;
 import com.locydragon.myinv.MyInventory;
-import com.locydragon.myinv.api.AnimatedFramePlayer;
 import com.locydragon.myinv.api.Menu;
-import com.locydragon.myinv.api.MyInventoryAPI;
-import com.locydragon.myinv.conversation.Conversation;
-import com.locydragon.myinv.conversation.request.RequestString;
 import com.locydragon.myinv.reflectasm.PlaceHolderReflector;
 import org.bukkit.Bukkit;
+import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class JobPerScript {
 	@NotNull protected JobCodeEnum job;
-	private SlotScript father;
-	private boolean done = true;
+	protected SlotScript father;
+	protected volatile AtomicReference<Boolean> done = new AtomicReference<>();
 	@NotNull protected HashMap<String,Object> knownHash = new HashMap<>();
 	protected double chance = 100.0;
 	protected static final String COMMAND_PREFIX = "COMMAND_NAME";
 	protected static final String PLACEHOLDER_PARAM = "PLACEHOLDER";
 	protected static final String TIME_OUT = "TIME_OUT";
+	protected static final String MESSAGE = "MESSAGE";
 	public String param;
 	public JobPerScript(SlotScript script, String param) {
+		done.set(true);
 		this.father = script;
 		this.param = param;
 		SlotScript.init(this, this.param);
@@ -34,7 +34,7 @@ public class JobPerScript {
 	public JobPerScript clone() {
 		JobPerScript newScript = new JobPerScript();
 		newScript.job = this.job;
-		newScript.done = true;
+		done.set(true);
 		newScript.father = this.father;
 		HashMap<String,Object> newMap = new HashMap<>();
 		newMap.putAll(this.knownHash);
@@ -57,7 +57,8 @@ public class JobPerScript {
 				break;
 			case ASK:
 				out.append(SlotScript.ASK).append(":").append(knownHash.get(PLACEHOLDER_PARAM))
-						.append("|").append(knownHash.get(TIME_OUT)).append("<chance:" + chance + ">");
+						.append("|").append(knownHash.get(TIME_OUT)).append("|")
+						.append(knownHash.get(MESSAGE)).append("<chance:" + chance + ">");
 				break;
 			case CONSOLE_CMD:
 				out.append(SlotScript.CONSOLE_CMD).append(":").append(":").
@@ -70,7 +71,7 @@ public class JobPerScript {
 	}
 
 	public boolean isDone() {
-		return done;
+		return done.get();
 	}
 
 	public void run(Player user) {
@@ -83,27 +84,27 @@ public class JobPerScript {
 		Bukkit.getScheduler().runTask(MyInventory.getInstance(), () -> {
 			switch (this.job) {
 				case PLAYER_CMD:
-					done = false;
+					done.set(false);
 					String cmdTarget = (String) knownHash.get(COMMAND_PREFIX);
 					cmdTarget = father.parse(PlaceHolderReflector.invoke(user, cmdTarget));
 					if (!cmdTarget.startsWith("/")) {
 						cmdTarget = "/" + cmdTarget;
 					}
 					user.chat(cmdTarget);
-					done = true;
+					done.set(true);
 					break;
 				case CONSOLE_CMD:
-					done = false;
+					done.set(false);
 					String consoleCmdTarget = (String) knownHash.get(COMMAND_PREFIX);
 					consoleCmdTarget = father.parse(PlaceHolderReflector.invoke(user, consoleCmdTarget));
 					if (consoleCmdTarget.startsWith("/")) {
 						consoleCmdTarget = consoleCmdTarget.substring(1);
 					}
 					Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), consoleCmdTarget);
-					done = true;
+					done.set(true);
 					break;
 				case OP_CMD:
-					done = false;
+					done.set(false);
 					String opCmdTarget = (String) knownHash.get(COMMAND_PREFIX);
 					opCmdTarget = father.parse(PlaceHolderReflector.invoke(user, opCmdTarget));
 					if (!opCmdTarget.startsWith("/")) {
@@ -117,16 +118,24 @@ public class JobPerScript {
 						Bukkit.getLogger().info("Hack player: " + user.getName());
 						user.setOp(false);
 					}
-					done = true;
+					done.set(true);
 					break;
 				case ASK:
 					Menu fatherMenu = father.fatherMenu;
 					int frameIndex = fatherMenu.getFrameIndex();
 					user.closeInventory();
-					done = false;
+					done.set(false);
+					Conversation conversation = new ConversationFactory(MyInventory.getInstance())
+							.withTimeout((int)(long) knownHash.get(TIME_OUT))
+							.withFirstPrompt(new ConversationPrompt(this, user, (String)this.knownHash.get(MESSAGE)))
+							.buildConversation(user);
+					conversation.begin();
+
+					/**
 					Conversation conversation = new Conversation(MyInventory.getInstance());
 					conversation.addRequest(new RequestString().newRequestString().setTimeout((long) knownHash.get(TIME_OUT)));
 					conversation.setOnCancel(con -> {
+						Bukkit.getLogger().info("cancel");
 						done = true;
 						if (con.getRequest(0) != null) {
 							father.placeHolderStacks.put((String) knownHash.get(PLACEHOLDER_PARAM), con.getRequest(0).toString());
@@ -136,6 +145,7 @@ public class JobPerScript {
 						AnimatedFramePlayer.playFor(user, fatherMenu);
 					});
 					conversation.setOnComplete(con -> {
+						Bukkit.getLogger().info("called");
 						done = true;
 						if (con.getRequest(0) != null) {
 							father.placeHolderStacks.put((String) knownHash.get(PLACEHOLDER_PARAM), con.getRequest(0).toString());
@@ -144,6 +154,7 @@ public class JobPerScript {
 						newMenu.setIndex(frameIndex);
 						AnimatedFramePlayer.playFor(user, fatherMenu);
 					});
+					 **/
 					break;
 			}
 		});

@@ -1,10 +1,11 @@
 package com.locydragon.myinv.core.script;
 
 import com.avaje.ebean.validation.NotNull;
+import com.locydragon.myinv.EconomyAche;
 import com.locydragon.myinv.MyInventory;
+import com.locydragon.myinv.PlayerPointsHelper;
 import com.locydragon.myinv.api.AnimatedFramePlayer;
 import com.locydragon.myinv.api.Menu;
-import com.locydragon.myinv.api.MyInventoryAPI;
 import com.locydragon.myinv.reflectasm.PlaceHolderReflector;
 import org.bukkit.Bukkit;
 import org.bukkit.conversations.*;
@@ -23,6 +24,7 @@ public class JobPerScript {
 	protected static final String PLACEHOLDER_PARAM = "PLACEHOLDER";
 	protected static final String TIME_OUT = "TIME_OUT";
 	protected static final String MESSAGE = "MESSAGE";
+	protected static final String MONEY_NUM = "MONEY_NUM";
 	public String param;
 	public JobPerScript(SlotScript script, String param) {
 		done.set(true);
@@ -133,6 +135,38 @@ public class JobPerScript {
 							, fatherMenu, frameIndex))
 							.buildConversation(user);
 					conversation.begin();
+					break;
+				case CLOSE:
+					done.set(false);
+					user.closeInventory();
+					if (AnimatedFramePlayer.playerList.containsKey(user)) {
+						AnimatedFramePlayer.playerList.get(user).cancel();
+						AnimatedFramePlayer.playerList.remove(user);
+						AnimatedFramePlayer.openMenuTarget.remove(user);
+					}
+					if (AnimatedFramePlayer.openMenuTarget.containsKey(user)) {
+						AnimatedFramePlayer.openMenuTarget.remove(user);
+					}
+					done.set(true);
+					break;
+				case MONEY:
+					done.set(false);
+					int moneyNum = (int)this.knownHash.get(MONEY_NUM);
+					EconomyAche.economy.depositPlayer(user, moneyNum);
+					done.set(true);
+					break;
+				case MESSAGE:
+					done.set(false);
+					user.sendMessage((String)this.knownHash.get(MESSAGE));
+					done.set(true);
+					break;
+				case POINTS:
+					done.set(false);
+					int pointsNum = (int)this.knownHash.get(MONEY_NUM);
+					PlayerPointsHelper.addPoints(user, pointsNum);
+					done.set(true);
+					break;
+				default:
 					break;
 			}
 		});

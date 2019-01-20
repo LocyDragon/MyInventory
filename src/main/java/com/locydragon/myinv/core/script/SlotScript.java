@@ -1,5 +1,6 @@
 package com.locydragon.myinv.core.script;
 
+import com.locydragon.myinv.MyInventory;
 import com.locydragon.myinv.api.Menu;
 import com.locydragon.myinv.util.StringParamEntry;
 import org.bukkit.ChatColor;
@@ -29,8 +30,12 @@ public class SlotScript {
 	protected static final String OP_CMD = "op";
 	protected static final String CONSOLE_CMD = "console";
 	protected static final String ASK = "ask";
-
+	protected static final String CLOSE = "close";
+	protected static final String MONEY = "money";
+	protected static final String TELL = "tell";
+	protected static final String POINTS = "points";
 	private static Pattern CHANCE_SELECT_PATTERN = null;
+
 	static {
 		CHANCE_SELECT_PATTERN = Pattern.compile("<chance:+\\S+>");
 	}
@@ -86,6 +91,18 @@ public class SlotScript {
 			} catch (Exception e) {
 				return;
 			}
+		} else if (StringParamEntry.startsWithIgnoreCase(type, CLOSE)) {
+			script.job = JobCodeEnum.CLOSE;
+		} else if (StringParamEntry.startsWithIgnoreCase(type, MONEY) && MyInventory.useVault) {
+			script.job = JobCodeEnum.MONEY;
+			script.knownHash.put(JobPerScript.MONEY_NUM, Integer.valueOf(value));
+		} else if (StringParamEntry.startsWithIgnoreCase(type, TELL)) {
+			script.job = JobCodeEnum.MESSAGE;
+			script.knownHash.put(JobPerScript.MESSAGE, ChatColor.translateAlternateColorCodes('&',
+					value));
+		} else if (StringParamEntry.startsWithIgnoreCase(type, POINTS)) {
+			script.job = JobCodeEnum.POINTS;
+			script.knownHash.put(JobPerScript.MONEY_NUM, Integer.valueOf(value));
 		}
 	}
 

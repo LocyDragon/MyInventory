@@ -2,7 +2,7 @@ name: MyInventory
 main: com.locydragon.myinv.MyInventory
 version: 0.1
 author: [LocyDragon]
-softdepend: [AudioBuffer,PlaceholderAPI]
+softdepend: [AudioBuffer,PlaceholderAPI,Vault,PlayerPoints]
 commands:
   myinv:
   miv:

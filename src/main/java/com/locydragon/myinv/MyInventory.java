@@ -13,8 +13,10 @@ import com.locydragon.myinv.listeners.ClickParamSender;
 import com.locydragon.myinv.listeners.InventoryProtectListener;
 import com.locydragon.myinv.listeners.editor.EditorListener;
 import com.locydragon.myinv.metrics.Metrics;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -30,6 +32,8 @@ public class MyInventory extends JavaPlugin {
 	public static Double period = 0.5;
 	public static boolean useAudioBuffer = false;
 	public static boolean usePAPI = false;
+	public static boolean useVault = false;
+	public static boolean usePlayerPoints = false;
 
 	@Override
 	public void onLoad() {
@@ -73,6 +77,26 @@ public class MyInventory extends JavaPlugin {
 			getLogger().info(">> 已经和 PlaceholderAPI 插件挂钩了.");
 		} else {
 			getLogger().info(">> 变量插件: PlaceholderAPI 不存在 挂钩失败.");
+		}
+		useVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
+		if (useVault) {
+			getLogger().info(">> 已经和经济插件挂钩了.");
+			RegisteredServiceProvider economyProvider = getServer()
+					.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+			EconomyAche.economy = (Economy) economyProvider.getProvider();
+		} else {
+			getLogger().info(">> 经济插件: Vault 不存在 挂钩失败");
+		}
+		usePlayerPoints = Bukkit.getPluginManager().getPlugin("PlayerPoints") != null;
+		if (usePlayerPoints) {
+			getLogger().info(">> 已经和点券插件挂钩了.");
+			try {
+				PlayerPointsHelper.init();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			getLogger().info(">> 点券插件: PlayerPoints 不存在 挂钩失败");
 		}
 	}
 

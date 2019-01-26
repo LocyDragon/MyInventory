@@ -7,10 +7,14 @@ import com.locydragon.myinv.PlayerPointsHelper;
 import com.locydragon.myinv.api.AnimatedFramePlayer;
 import com.locydragon.myinv.api.Menu;
 import com.locydragon.myinv.reflectasm.PlaceHolderReflector;
+import com.locydragon.myinv.util.Calculator;
+import com.locydragon.myinv.util.Compare;
 import org.bukkit.Bukkit;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,12 +29,28 @@ public class JobPerScript {
 	protected static final String TIME_OUT = "TIME_OUT";
 	protected static final String MESSAGE = "MESSAGE";
 	protected static final String MONEY_NUM = "MONEY_NUM";
+	protected static final String OBJECT = "OBJECT";
+	protected static final String COMPARE_OBJECT = "COMPARE_OBJECT";
 	public String param;
+	private static final Calculator calculator = new Calculator();
+
+	private static Method CONVERSATION_CANCELLER_METHOD = null;
+	static {
+		try {
+			CONVERSATION_CANCELLER_METHOD = Conversation.class.getDeclaredMethod("addConversationCanceller"
+			, ConversationCanceller.class);
+			CONVERSATION_CANCELLER_METHOD.setAccessible(true);
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public JobPerScript(SlotScript script, String param) {
 		done.set(true);
 		this.father = script;
 		this.param = param;
 		SlotScript.init(this, this.param);
+		this.knownHash.put("%RANDOM%", Math.random());
 	}
 
 	private JobPerScript() {}
@@ -65,8 +85,28 @@ public class JobPerScript {
 						.append(knownHash.get(MESSAGE)).append("<chance:" + chance + ">");
 				break;
 			case CONSOLE_CMD:
-				out.append(SlotScript.CONSOLE_CMD).append(":").append(":").
+				out.append(SlotScript.CONSOLE_CMD).append(":").
 						append(knownHash.get(COMMAND_PREFIX)).append("<chance:" + chance + ">");
+				break;
+			case CLOSE:
+				out.append(SlotScript.CLOSE);
+				break;
+			case MONEY:
+				out.append(SlotScript.MONEY).append(":").append((String)this.knownHash.get(MONEY_NUM));
+				break;
+			case MESSAGE:
+				out.append(SlotScript.TELL).append(":")
+						.append((String)this.knownHash.get(MESSAGE));
+				break;
+			case POINTS:
+				out.append(SlotScript.POINTS).append(":")
+						.append((String)this.knownHash.get(MONEY_NUM));
+				break;
+			case IS_NUMBER:
+				out.append(SlotScript.IS_NUMBER).append(":").append((String)this.knownHash.get(OBJECT));
+				break;
+			case HAS_PERMISSION:
+				out.append(SlotScript.HAS_PERMISSION).append(":").append((String)this.knownHash.get(OBJECT));
 				break;
 			default:
 				return null;
@@ -78,12 +118,13 @@ public class JobPerScript {
 		return done.get();
 	}
 
-	public void run(Player user) {
+	public Result run(Player user) {
+		Result[] mainResult = new Result[] {Result.CONTINUE};
 		if (this.job == null) {
-			return;
+			return mainResult[0];
 		}
 		if (Math.random() * 100 + 1 >= chance) {
-			return;
+			return mainResult[0];
 		}
 		Bukkit.getScheduler().runTask(MyInventory.getInstance(), () -> {
 			switch (this.job) {
@@ -129,12 +170,17 @@ public class JobPerScript {
 					int frameIndex = fatherMenu.getFrameIndex();
 					user.closeInventory();
 					done.set(false);
-					Conversation conversation = new ConversationFactory(MyInventory.getInstance())
-							.withTimeout((int)(long) knownHash.get(TIME_OUT))
-							.withFirstPrompt(new ConversationPrompt(this, user, (String)this.knownHash.get(MESSAGE)
-							, fatherMenu, frameIndex))
-							.buildConversation(user);
-					conversation.begin();
+					NonMsgConversation nonMsgConversation = new NonMsgConversation(MyInventory.getInstance()
+					, user, new ConversationPrompt(this, user,
+							parseString(user, (String)this.knownHash.get(MESSAGE))
+							, fatherMenu, frameIndex));
+					try {
+						CONVERSATION_CANCELLER_METHOD.invoke(nonMsgConversation,
+								new InactivityConversationCanceller(MyInventory.getInstance(), (int)(long) knownHash.get(TIME_OUT)));
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						e.printStackTrace();
+					}
+					nonMsgConversation.begin();
 					break;
 				case CLOSE:
 					done.set(false);
@@ -151,24 +197,68 @@ public class JobPerScript {
 					break;
 				case MONEY:
 					done.set(false);
-					int moneyNum = (int)this.knownHash.get(MONEY_NUM);
+					int moneyNum = (int)toInteger(parseString(user, (String)this.knownHash.get(MONEY_NUM)));
 					EconomyAche.economy.depositPlayer(user, moneyNum);
 					done.set(true);
 					break;
 				case MESSAGE:
 					done.set(false);
-					user.sendMessage((String)this.knownHash.get(MESSAGE));
+					user.sendMessage(parseString(user, (String)this.knownHash.get(MESSAGE)));
 					done.set(true);
 					break;
 				case POINTS:
 					done.set(false);
-					int pointsNum = (int)this.knownHash.get(MONEY_NUM);
+					int pointsNum = (int)toInteger(parseString(user, (String)this.knownHash.get(MONEY_NUM)));
 					PlayerPointsHelper.addPoints(user, pointsNum);
 					done.set(true);
+					break;
+				case IS_NUMBER:
+					String outPut = (String)this.knownHash.get(OBJECT);
+					if (!isInteger(outPut)) {
+						mainResult[0] = Result.END;
+					} else {
+						mainResult[0] = Result.CONTINUE;
+					}
+					break;
+				case HAS_PERMISSION:
+					String permission = (String)this.knownHash.get(OBJECT);
+					if (!user.hasPermission(permission)) {
+						mainResult[0] = Result.END;
+					} else {
+						mainResult[0] = Result.CONTINUE;
+					}
+					break;
+				case COMPARE:
+					String compareString = (String)this.knownHash.get(COMPARE_OBJECT);
+					if (!Compare.compare(parseString(user, compareString))) {
+						mainResult[0] = Result.END;
+					} else {
+						mainResult[0] = Result.CONTINUE;
+					}
 					break;
 				default:
 					break;
 			}
 		});
+		return mainResult[0];
+	}
+
+	private String parseString(Player user, String input) {
+		return father.parse(PlaceHolderReflector.invoke(user, input));
+	}
+
+	private double toInteger(String input) {
+		double out = calculator.calculate(input);
+		calculator.clear();
+		return out;
+	}
+
+	private boolean isInteger(String input) {
+		try {
+			Double.valueOf(input);
+			return true;
+		} catch (Exception exc) {
+			return false;
+		}
 	}
 }

@@ -102,6 +102,9 @@ public class Menu implements Serializable {
 
 	public void save() {
 		File outputFile = new File(".//plugins//MyInventory//Gui//"+this.menuName+".yml");
+		if (outputFile.exists()) {
+			outputFile.delete();
+		}
 		if (!outputFile.exists()) {
 			outputFile.getParentFile().mkdirs();
 			try {

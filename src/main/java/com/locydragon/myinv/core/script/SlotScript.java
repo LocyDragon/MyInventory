@@ -34,6 +34,11 @@ public class SlotScript {
 	protected static final String MONEY = "money";
 	protected static final String TELL = "tell";
 	protected static final String POINTS = "points";
+	protected static final String XP = "xp";
+
+	protected static final String IS_NUMBER = "number";
+	protected static final String HAS_PERMISSION = "permission";
+	protected static final String COMPARE = "compare";
 	private static Pattern CHANCE_SELECT_PATTERN = null;
 
 	static {
@@ -95,14 +100,23 @@ public class SlotScript {
 			script.job = JobCodeEnum.CLOSE;
 		} else if (StringParamEntry.startsWithIgnoreCase(type, MONEY) && MyInventory.useVault) {
 			script.job = JobCodeEnum.MONEY;
-			script.knownHash.put(JobPerScript.MONEY_NUM, Integer.valueOf(value));
+			script.knownHash.put(JobPerScript.MONEY_NUM, value);
 		} else if (StringParamEntry.startsWithIgnoreCase(type, TELL)) {
 			script.job = JobCodeEnum.MESSAGE;
 			script.knownHash.put(JobPerScript.MESSAGE, ChatColor.translateAlternateColorCodes('&',
 					value));
 		} else if (StringParamEntry.startsWithIgnoreCase(type, POINTS)) {
 			script.job = JobCodeEnum.POINTS;
-			script.knownHash.put(JobPerScript.MONEY_NUM, Integer.valueOf(value));
+			script.knownHash.put(JobPerScript.MONEY_NUM, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, IS_NUMBER)) {
+			script.job = JobCodeEnum.IS_NUMBER;
+			script.knownHash.put(JobPerScript.OBJECT, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, HAS_PERMISSION)) {
+			script.job = JobCodeEnum.HAS_PERMISSION;
+			script.knownHash.put(JobPerScript.OBJECT, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, COMPARE)) {
+			script.job = JobCodeEnum.COMPARE;
+			script.knownHash.put(JobPerScript.COMPARE_OBJECT, value);
 		}
 	}
 
@@ -138,13 +152,16 @@ public class SlotScript {
 			waitingQueue.add(who.getName());
 			for (JobPerScript script : this.scripts) {
 				script.done.set(false);
-				script.run(who);
+				Result result = script.run(who);
 				while (!script.isDone()) {
 					try {
 						Thread.sleep(1);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+				}
+				if (result != null && result == Result.END) {
+					break;
 				}
 			}
 			waitingQueue.remove(who.getName());

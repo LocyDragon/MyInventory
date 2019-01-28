@@ -108,8 +108,17 @@ public class JobPerScript {
 			case HAS_PERMISSION:
 				out.append(SlotScript.HAS_PERMISSION).append(":").append((String)this.knownHash.get(OBJECT));
 				break;
+			case COMPARE:
+				out.append(SlotScript.COMPARE).append(":").append((String)this.knownHash.get(COMPARE_OBJECT));
+				break;
+			case COST:
+				out.append(SlotScript.COST).append(":").append((String)this.knownHash.get(MONEY_NUM));
+				break;
+			case COST_POINT:
+				out.append(SlotScript.POINT_COST).append(":").append((String)this.knownHash.get(MONEY_NUM));
+				break;
 			default:
-				return null;
+				return "";
 		}
 		return out.toString();
 	}
@@ -213,28 +222,56 @@ public class JobPerScript {
 					done.set(true);
 					break;
 				case IS_NUMBER:
+					done.set(false);
 					String outPut = (String)this.knownHash.get(OBJECT);
 					if (!isInteger(outPut)) {
 						mainResult[0] = Result.END;
 					} else {
 						mainResult[0] = Result.CONTINUE;
 					}
+					done.set(true);
 					break;
 				case HAS_PERMISSION:
+					done.set(false);
 					String permission = (String)this.knownHash.get(OBJECT);
 					if (!user.hasPermission(permission)) {
 						mainResult[0] = Result.END;
 					} else {
 						mainResult[0] = Result.CONTINUE;
 					}
+					done.set(true);
 					break;
 				case COMPARE:
+					done.set(false);
 					String compareString = (String)this.knownHash.get(COMPARE_OBJECT);
 					if (!Compare.compare(parseString(user, compareString))) {
 						mainResult[0] = Result.END;
 					} else {
 						mainResult[0] = Result.CONTINUE;
 					}
+					done.set(true);
+					break;
+				case COST:
+					done.set(false);
+					int costNum = (int)toInteger(parseString(user, (String)this.knownHash.get(MONEY_NUM)));
+					if (EconomyAche.economy.has(user, costNum)) {
+						EconomyAche.economy.withdrawPlayer(user, costNum);
+						mainResult[0] = Result.CONTINUE;
+					} else {
+						mainResult[0] = Result.END;
+					}
+					done.set(true);
+					break;
+				case COST_POINT:
+					done.set(false);
+					int pointNum = (int)toInteger(parseString(user, (String)this.knownHash.get(MONEY_NUM)));
+					if (pointNum > PlayerPointsHelper.look(user)) {
+						mainResult[0] = Result.END;
+					} else {
+						PlayerPointsHelper.take(user, pointNum);
+						mainResult[0] = Result.CONTINUE;
+					}
+					done.set(true);
 					break;
 				default:
 					break;

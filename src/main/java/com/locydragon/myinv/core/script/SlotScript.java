@@ -33,12 +33,17 @@ public class SlotScript {
 	protected static final String CLOSE = "close";
 	protected static final String MONEY = "money";
 	protected static final String TELL = "tell";
-	protected static final String POINTS = "points";
-	protected static final String XP = "xp";
+	protected static final String POINTS = "point";
+	protected static final String XP = "xp"; //弃用的
 
 	protected static final String IS_NUMBER = "number";
 	protected static final String HAS_PERMISSION = "permission";
 	protected static final String COMPARE = "compare";
+
+	protected static final String COST = "cost";
+	protected static final String POINT_COST = "spend";
+
+
 	private static Pattern CHANCE_SELECT_PATTERN = null;
 
 	static {
@@ -117,6 +122,12 @@ public class SlotScript {
 		} else if (StringParamEntry.startsWithIgnoreCase(type, COMPARE)) {
 			script.job = JobCodeEnum.COMPARE;
 			script.knownHash.put(JobPerScript.COMPARE_OBJECT, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, COST)) {
+			script.job = JobCodeEnum.COST;
+			script.knownHash.put(JobPerScript.MONEY_NUM, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, POINT_COST)) {
+			script.job = JobCodeEnum.COST_POINT;
+			script.knownHash.put(JobPerScript.MONEY_NUM, value);
 		}
 	}
 

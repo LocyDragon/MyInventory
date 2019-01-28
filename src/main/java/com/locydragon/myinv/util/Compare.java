@@ -7,6 +7,15 @@ public final class Compare {
         cal.clear();
         return out;
     }
+
+    private static boolean isInt(String param) {
+        try {
+            toInteger(param);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
     /*
     >
     <
@@ -49,6 +58,21 @@ public final class Compare {
                 return true;
             } else {
                 return false;
+            }
+        } else if (str.contains("=")) {
+            String[] params = str.split("=");
+            if (!isInt(params[0])) {
+                if (params[0].equals(params[1])) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                if (toInteger(params[0]) == toInteger(params[1])) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
         } else {
             try {

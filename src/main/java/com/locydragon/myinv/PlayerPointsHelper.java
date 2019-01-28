@@ -24,4 +24,23 @@ public class PlayerPointsHelper {
 			e.printStackTrace();
 		}
 	}
+
+	public static int look(Player user) {
+		try {
+			return (int)instance.getClass().getMethod("look", new Class[] {UUID.class})
+					.invoke(instance, user.getUniqueId());
+		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+		return -1;
+	}
+
+	public static void take(Player user, int takeMoney) {
+		try {
+			instance.getClass().getMethod("take", new Class[] {UUID.class, int.class})
+					.invoke(instance, user.getUniqueId(), takeMoney);
+		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+	}
 }

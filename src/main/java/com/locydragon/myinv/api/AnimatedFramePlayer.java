@@ -33,6 +33,7 @@ public class AnimatedFramePlayer {
 					next.findDifferenceAndSet(who.getOpenInventory(), who);
 					who.updateInventory();
 				}
+				openMenuTarget.replace(who, menu);
 			},0L, (long)(menu.getPeriod() * 20));
 			playerList.put(who, task);
 		}

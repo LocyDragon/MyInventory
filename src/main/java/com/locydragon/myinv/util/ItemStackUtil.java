@@ -75,7 +75,7 @@ public class ItemStackUtil {
 		Material targetMaterial = MaterialControl.fromString(itemID).parseMaterial();
 		int amount = 0;
 		for (ItemStack item : target) {
-			if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+			if (item != null) {
 				if (item.getType() == targetMaterial || item.getType().equals(targetMaterial)) {
 					amount += item.getAmount();
 				}

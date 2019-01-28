@@ -308,7 +308,7 @@ public class JobPerScript {
 					done.set(false);
 					int amountName = (int)toInteger(parseString(user, (String)this.knownHash.get(AMOUNT)));
 					String itemName = parseString(user, (String)this.knownHash.get(ITEM_NAME));
-					if (ItemStackUtil.take(itemName, user.getInventory(), amountName)) {
+					if (!ItemStackUtil.take(itemName, user.getInventory(), amountName)) {
 						user.updateInventory();
 						mainResult[0] = Result.END;
 						result.set(Result.END);
@@ -322,7 +322,7 @@ public class JobPerScript {
 					done.set(false);
 					int amountID = (int)toInteger(parseString(user, (String)this.knownHash.get(AMOUNT)));
 					String itemID = parseString(user, (String)this.knownHash.get(ITEM_ID));
-					if (ItemStackUtil.takeByName(itemID, user.getInventory(), amountID)) {
+					if (!ItemStackUtil.takeByName(itemID, user.getInventory(), amountID)) {
 						user.updateInventory();
 						mainResult[0] = Result.END;
 						result.set(Result.END);

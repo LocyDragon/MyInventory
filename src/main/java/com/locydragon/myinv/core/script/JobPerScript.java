@@ -6,9 +6,11 @@ import com.locydragon.myinv.MyInventory;
 import com.locydragon.myinv.PlayerPointsHelper;
 import com.locydragon.myinv.api.AnimatedFramePlayer;
 import com.locydragon.myinv.api.Menu;
+import com.locydragon.myinv.api.MyInventoryAPI;
 import com.locydragon.myinv.reflectasm.PlaceHolderReflector;
 import com.locydragon.myinv.util.Calculator;
 import com.locydragon.myinv.util.Compare;
+import com.locydragon.myinv.util.ItemStackUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.conversations.*;
 import org.bukkit.entity.Player;
@@ -22,6 +24,7 @@ public class JobPerScript {
 	@NotNull protected JobCodeEnum job;
 	protected SlotScript father;
 	protected volatile AtomicReference<Boolean> done = new AtomicReference<>();
+	protected volatile AtomicReference<Result> result = new AtomicReference<>();
 	@NotNull protected HashMap<String,Object> knownHash = new HashMap<>();
 	protected double chance = 100.0;
 	protected static final String COMMAND_PREFIX = "COMMAND_NAME";
@@ -31,6 +34,10 @@ public class JobPerScript {
 	protected static final String MONEY_NUM = "MONEY_NUM";
 	protected static final String OBJECT = "OBJECT";
 	protected static final String COMPARE_OBJECT = "COMPARE_OBJECT";
+	protected static final String AMOUNT = "AMOUNT";
+	protected static final String ITEM_NAME = "ITEM_NAME";
+	protected static final String ITEM_ID = "ITEM_ID";
+
 	public String param;
 	private static final Calculator calculator = new Calculator();
 
@@ -45,8 +52,13 @@ public class JobPerScript {
 		}
 	}
 
+	public Result getResult() {
+		return result.get();
+	}
+
 	public JobPerScript(SlotScript script, String param) {
 		done.set(true);
+		result.set(Result.CONTINUE);
 		this.father = script;
 		this.param = param;
 		SlotScript.init(this, this.param);
@@ -58,7 +70,7 @@ public class JobPerScript {
 	public JobPerScript clone() {
 		JobPerScript newScript = new JobPerScript();
 		newScript.job = this.job;
-		done.set(true);
+		newScript.done.set(true);
 		newScript.father = this.father;
 		HashMap<String,Object> newMap = new HashMap<>();
 		newMap.putAll(this.knownHash);
@@ -177,7 +189,6 @@ public class JobPerScript {
 				case ASK:
 					Menu fatherMenu = father.fatherMenu;
 					int frameIndex = fatherMenu.getFrameIndex();
-					user.closeInventory();
 					done.set(false);
 					NonMsgConversation nonMsgConversation = new NonMsgConversation(MyInventory.getInstance()
 					, user, new ConversationPrompt(this, user,
@@ -189,6 +200,16 @@ public class JobPerScript {
 					} catch (IllegalAccessException | InvocationTargetException e) {
 						e.printStackTrace();
 					}
+					nonMsgConversation.addConversationAbandonedListener(new ConversationAbandonedListener() {
+						@Override
+						public void conversationAbandoned(ConversationAbandonedEvent e) {
+							if (e.getCanceller() != null &&
+									e.getCanceller().getClass().equals(InactivityConversationCanceller.class)) {
+								result.set(Result.END);
+								done.set(true);
+							}
+						}
+					});
 					nonMsgConversation.begin();
 					break;
 				case CLOSE:
@@ -223,11 +244,13 @@ public class JobPerScript {
 					break;
 				case IS_NUMBER:
 					done.set(false);
-					String outPut = (String)this.knownHash.get(OBJECT);
+					String outPut = parseString(user, (String)this.knownHash.get(OBJECT));
 					if (!isInteger(outPut)) {
 						mainResult[0] = Result.END;
+						result.set(Result.END);
 					} else {
 						mainResult[0] = Result.CONTINUE;
+						result.set(Result.CONTINUE);
 					}
 					done.set(true);
 					break;
@@ -236,8 +259,10 @@ public class JobPerScript {
 					String permission = (String)this.knownHash.get(OBJECT);
 					if (!user.hasPermission(permission)) {
 						mainResult[0] = Result.END;
+						result.set(Result.END);
 					} else {
 						mainResult[0] = Result.CONTINUE;
+						result.set(Result.CONTINUE);
 					}
 					done.set(true);
 					break;
@@ -246,8 +271,10 @@ public class JobPerScript {
 					String compareString = (String)this.knownHash.get(COMPARE_OBJECT);
 					if (!Compare.compare(parseString(user, compareString))) {
 						mainResult[0] = Result.END;
+						result.set(Result.END);
 					} else {
 						mainResult[0] = Result.CONTINUE;
+						result.set(Result.CONTINUE);
 					}
 					done.set(true);
 					break;
@@ -257,8 +284,10 @@ public class JobPerScript {
 					if (EconomyAche.economy.has(user, costNum)) {
 						EconomyAche.economy.withdrawPlayer(user, costNum);
 						mainResult[0] = Result.CONTINUE;
+						result.set(Result.CONTINUE);
 					} else {
 						mainResult[0] = Result.END;
+						result.set(Result.END);
 					}
 					done.set(true);
 					break;
@@ -267,9 +296,39 @@ public class JobPerScript {
 					int pointNum = (int)toInteger(parseString(user, (String)this.knownHash.get(MONEY_NUM)));
 					if (pointNum > PlayerPointsHelper.look(user)) {
 						mainResult[0] = Result.END;
+						result.set(Result.END);
 					} else {
 						PlayerPointsHelper.take(user, pointNum);
 						mainResult[0] = Result.CONTINUE;
+						result.set(Result.CONTINUE);
+					}
+					done.set(true);
+					break;
+				case ITEM_COST_BY_NAME:
+					done.set(false);
+					int amountName = (int)toInteger(parseString(user, (String)this.knownHash.get(AMOUNT)));
+					String itemName = parseString(user, (String)this.knownHash.get(ITEM_NAME));
+					if (ItemStackUtil.take(itemName, user.getInventory(), amountName)) {
+						user.updateInventory();
+						mainResult[0] = Result.END;
+						result.set(Result.END);
+					} else {
+						mainResult[0] = Result.CONTINUE;
+						result.set(Result.CONTINUE);
+					}
+ 					done.set(true);
+					break;
+				case ITEM_COST_BY_ENGLISH_NAME:
+					done.set(false);
+					int amountID = (int)toInteger(parseString(user, (String)this.knownHash.get(AMOUNT)));
+					String itemID = parseString(user, (String)this.knownHash.get(ITEM_ID));
+					if (ItemStackUtil.takeByName(itemID, user.getInventory(), amountID)) {
+						user.updateInventory();
+						mainResult[0] = Result.END;
+						result.set(Result.END);
+					} else {
+						mainResult[0] = Result.CONTINUE;
+						result.set(Result.CONTINUE);
 					}
 					done.set(true);
 					break;
@@ -281,7 +340,7 @@ public class JobPerScript {
 	}
 
 	private String parseString(Player user, String input) {
-		return father.parse(PlaceHolderReflector.invoke(user, input));
+		return father.parse(PlaceHolderReflector.invoke(user, input.trim()));
 	}
 
 	private double toInteger(String input) {
@@ -292,7 +351,8 @@ public class JobPerScript {
 
 	private boolean isInteger(String input) {
 		try {
-			Double.valueOf(input);
+			input = input.trim();
+			Integer.valueOf(input);
 			return true;
 		} catch (Exception exc) {
 			return false;

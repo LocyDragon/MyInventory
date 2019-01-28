@@ -35,9 +35,6 @@ public class ConversationPrompt implements Prompt {
 	public Prompt acceptInput(ConversationContext conversationContext, String in) {
 		script.father.placeHolderStacks.put((String)script.knownHash.get(JobPerScript.PLACEHOLDER_PARAM), in);
 		script.done.set(true);
-		Menu newMenu = MyInventoryAPI.getMenu(fatherMenu.getMenuName());
-		newMenu.setIndex(frameIndex);
-		AnimatedFramePlayer.playFor(who, newMenu);
 		return Prompt.END_OF_CONVERSATION;
 	}
 }

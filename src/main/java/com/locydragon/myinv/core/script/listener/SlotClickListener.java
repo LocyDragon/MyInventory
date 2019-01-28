@@ -15,7 +15,11 @@ public class SlotClickListener implements Listener {
 			String menuName = MyInventoryAPI.getMenuOpening((Player)e.getWhoClicked()).getMenuName();
 			SlotScript targetScript = SlotScriptAche.searchScript(menuName, e.getSlot());
 			if (targetScript != null) {
-				targetScript.run((Player)e.getWhoClicked(), e.getSlot());
+				if (targetScript.action != null && targetScript.action.equalsIgnoreCase(e.getClick().toString())) {
+					targetScript.run((Player) e.getWhoClicked(), e.getSlot());
+				} else {
+					targetScript.run((Player) e.getWhoClicked(), e.getSlot());
+				}
 			}
 		}
 	}

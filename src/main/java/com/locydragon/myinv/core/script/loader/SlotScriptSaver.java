@@ -14,6 +14,8 @@ public class SlotScriptSaver {
 		config.set(key + SlotScriptLoader.SLOT_PATH, script.getScripts());
 		config.set(key + SlotScriptLoader.MENU_PATH, script.getMenuName());
 		config.set(key + SlotScriptLoader.SCRIPT_PATH, script.getScripts());
+		config.set(key + SlotScriptLoader.OUT_PATH, script.out);
+		config.set(key + SlotScriptLoader.ACTION, script.action);
 		try {
 			config.save(yaml);
 		} catch (IOException e) {

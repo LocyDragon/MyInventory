@@ -20,6 +20,9 @@ public class SlotScriptAche {
 				script[0] = x.getValue();
 			}
 		});
+		if (script[0] != null) {
+			script[0] = script[0].deepClone();
+		}
 		return script[0];
 	}
 

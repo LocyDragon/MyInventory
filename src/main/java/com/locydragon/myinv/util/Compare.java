@@ -26,53 +26,57 @@ public final class Compare {
     public static boolean compare(String str) {
         if (str.contains(">")) {
             String[] string = str.split(">");
-            if (toInteger(string[0]) > toInteger(string[1])) {
+            if (toInteger(string[0].trim()) > toInteger(string[1].trim())) {
                 return true;
             } else {
                 return false;
             }
         } else if (str.contains("<")) {
             String[] string = str.split("<");
-            if (toInteger(string[0]) < toInteger(string[1])) {
+            if (toInteger(string[0].trim()) < toInteger(string[1].trim())) {
                 return true;
             } else {
                 return false;
             }
         } else if (str.contains("<=")) {
             String[] string = str.replace("<=", "惀").split("惀");
-            if (toInteger(string[0]) <= toInteger(string[1])) {
+            if (toInteger(string[0].trim()) <= toInteger(string[1].trim())) {
                 return true;
             } else {
                 return false;
             }
         } else if (str.contains(">=")) {
             String[] string = str.replace(">=", "惀").split("惀");
-            if (toInteger(string[0]) >= toInteger(string[1])) {
+            if (toInteger(string[0].trim()) >= toInteger(string[1].trim())) {
                 return true;
             } else {
                 return false;
             }
         } else if (str.contains("!=")) {
             String[] string = str.replace("!=", "惀").split("惀");
-            if (toInteger(string[0]) != toInteger(string[1])) {
+            if (toInteger(string[0].trim()) != toInteger(string[1].trim())) {
                 return true;
             } else {
                 return false;
             }
         } else if (str.contains("=")) {
             String[] params = str.split("=");
-            if (!isInt(params[0])) {
-                if (params[0].equals(params[1])) {
+            boolean first_isInt = isInt(params[0].trim());
+            boolean second_isInt = isInt(params[1].trim());
+            if (!first_isInt && !second_isInt) {
+                if (params[0].trim().equals(params[1].trim())) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else if (first_isInt && second_isInt){
+                if (toInteger(params[0].trim()) == toInteger(params[1].trim())) {
                     return true;
                 } else {
                     return false;
                 }
             } else {
-                if (toInteger(params[0]) == toInteger(params[1])) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return false;
             }
         } else {
             try {

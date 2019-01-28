@@ -13,6 +13,8 @@ public class SlotScriptLoader {
 	protected static final String MENU_PATH = ".linkToMenu";
 	protected static final String SLOT_PATH = ".location";
 	protected static final String SCRIPT_PATH = ".script";
+	protected static final String OUT_PATH = ".out";
+	protected static final String ACTION = ".action";
 	public static HashMap<SlotLabel,SlotScript> loadByFile(File input) {
 		HashMap<SlotLabel,SlotScript> mapLoaded = new HashMap<>();
 		FileConfiguration config = YamlConfiguration.loadConfiguration(input);
@@ -28,6 +30,8 @@ public class SlotScriptLoader {
 			}
 			SlotLabel label = new SlotLabel(slot, menuName);
 			SlotScript script = new SlotScript(slot, MyInventoryAPI.getMenu(menuName), scripts);
+			script.out = config.getString(key + OUT_PATH, null);
+			script.action = config.getString(key + ACTION, null);
 			mapLoaded.put(label, script);
 		}
 		return mapLoaded;

@@ -4,15 +4,14 @@ import com.locydragon.myinv.MyInventory;
 import com.locydragon.myinv.api.events.MenuOpenEvent;
 import com.locydragon.myinv.core.audio.AudioPlayerOut;
 import com.locydragon.myinv.util.InventorySerialization;
+import com.locydragon.myinv.util.VolatileMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
-import java.util.HashMap;
 
 public class AnimatedFramePlayer {
-
-	public static HashMap<Player,BukkitTask> playerList = new HashMap<>();
-	public static HashMap<Player,Menu> openMenuTarget = new HashMap<>();
+	public static volatile VolatileMap<Player,BukkitTask> playerList = new VolatileMap<>();
+	public static volatile VolatileMap<Player,Menu> openMenuTarget = new VolatileMap<>();
 	public static void playFor(Player who, Menu menu) {
 		Bukkit.getPluginManager().callEvent(new MenuOpenEvent(who, menu));
 		if (menu.hasMusic()) {
@@ -35,7 +34,7 @@ public class AnimatedFramePlayer {
 				}
 				openMenuTarget.replace(who, menu);
 			},0L, (long)(menu.getPeriod() * 20));
-			playerList.put(who, task);
+			AnimatedFramePlayer.playerList.put(who, task);
 		}
 	}
 }

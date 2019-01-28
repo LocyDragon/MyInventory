@@ -1,8 +1,11 @@
 package com.locydragon.myinv.core.script;
 
 import com.locydragon.myinv.MyInventory;
+import com.locydragon.myinv.api.AnimatedFramePlayer;
 import com.locydragon.myinv.api.Menu;
+import com.locydragon.myinv.api.MyInventoryAPI;
 import com.locydragon.myinv.util.StringParamEntry;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -21,6 +24,8 @@ public class SlotScript {
 	public static ConcurrentLinkedQueue<String> waitingQueue = new ConcurrentLinkedQueue<>();
 	public static Executor threadPool = Executors.newCachedThreadPool();
 	protected ConcurrentHashMap<String,String> placeHolderStacks = new ConcurrentHashMap<>();
+	public String out;
+	public String action;
 	private List<JobPerScript> scripts = new ArrayList<>();
 	private int slot;
 	protected Menu fatherMenu;
@@ -42,6 +47,8 @@ public class SlotScript {
 
 	protected static final String COST = "cost";
 	protected static final String POINT_COST = "spend";
+	protected static final String COST_ITEM_BY_NAME = "name_item";
+	protected static final String COST_ITEM_BY_ID = "id_item";
 
 
 	private static Pattern CHANCE_SELECT_PATTERN = null;
@@ -91,7 +98,7 @@ public class SlotScript {
 			script.knownHash.put(JobPerScript.COMMAND_PREFIX, value);
 		} else if (StringParamEntry.startsWithIgnoreCase(type, ASK)) {
 			script.job = JobCodeEnum.ASK;
-			String[] params = value.split("\\|");
+			String[] params = value.split("\\|", 3);
 			try {
 				long timeOut = Long.valueOf(params[1]);
 				script.knownHash.put(JobPerScript.TIME_OUT, timeOut);
@@ -128,6 +135,16 @@ public class SlotScript {
 		} else if (StringParamEntry.startsWithIgnoreCase(type, POINT_COST)) {
 			script.job = JobCodeEnum.COST_POINT;
 			script.knownHash.put(JobPerScript.MONEY_NUM, value);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, COST_ITEM_BY_NAME)) {
+			script.job = JobCodeEnum.ITEM_COST_BY_NAME;
+			String[] params = value.split("\\|", 2);
+			script.knownHash.put(JobPerScript.ITEM_NAME, params[1]);
+			script.knownHash.put(JobPerScript.AMOUNT, params[0]);
+		} else if (StringParamEntry.startsWithIgnoreCase(type, COST_ITEM_BY_ID)) {
+			script.job = JobCodeEnum.ITEM_COST_BY_ENGLISH_NAME;
+			String[] params = value.split("\\|", 2);
+			script.knownHash.put(JobPerScript.ITEM_ID, params[1]);
+			script.knownHash.put(JobPerScript.AMOUNT, params[0]);
 		}
 	}
 
@@ -136,6 +153,15 @@ public class SlotScript {
 			input = input.replace(entry.getKey(), entry.getValue());
 		}
 		return input;
+	}
+
+	public boolean containsType(JobCodeEnum type) {
+		for (JobPerScript script : this.scripts) {
+			if (script.job == type || script.job.equals(type)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public SlotScript deepClone() {
@@ -149,6 +175,8 @@ public class SlotScript {
 		newObject.slot = this.slot;
 		newObject.fatherMenu = this.fatherMenu;
 		newObject.scriptsString = this.scriptsString;
+		newObject.out = this.out;
+		newObject.action = this.action;
 		return newObject;
 	}
 
@@ -159,11 +187,28 @@ public class SlotScript {
 		if (waitingQueue.contains(who.getName().toUpperCase())) {
 			return;
 		}
+		boolean reOpenMenu = containsType(JobCodeEnum.ASK);
+		if (reOpenMenu) {
+			who.closeInventory();
+			if (AnimatedFramePlayer.playerList.containsKey(who)) {
+				AnimatedFramePlayer.playerList.get(who).cancel();
+				AnimatedFramePlayer.playerList.remove(who);
+			}
+			if (AnimatedFramePlayer.openMenuTarget.containsKey(who)) {
+				AnimatedFramePlayer.openMenuTarget.remove(who);
+			}
+		}
 		threadPool.execute(() -> {
-			waitingQueue.add(who.getName());
+			waitingQueue.add(who.getName().toUpperCase());
 			for (JobPerScript script : this.scripts) {
 				script.done.set(false);
-				Result result = script.run(who);
+				try {
+					script.run(who);
+				} catch (Throwable throwable) {
+					throwable.printStackTrace();
+					waitingQueue.remove(who.getName().toUpperCase());
+					break;
+				}
 				while (!script.isDone()) {
 					try {
 						Thread.sleep(1);
@@ -171,11 +216,23 @@ public class SlotScript {
 						e.printStackTrace();
 					}
 				}
+				Result result = script.getResult();
 				if (result != null && result == Result.END) {
+					if (out != null) {
+						who.sendMessage(ChatColor.translateAlternateColorCodes('&'
+						, out));
+					}
+					waitingQueue.remove(who.getName().toUpperCase());
 					break;
 				}
 			}
-			waitingQueue.remove(who.getName());
+			waitingQueue.remove(who.getName().toUpperCase());
+			Bukkit.getScheduler().runTask(MyInventory.getInstance(), () -> {
+				if (reOpenMenu) {
+					Menu newMenu = MyInventoryAPI.getMenu(fatherMenu.getMenuName());
+					AnimatedFramePlayer.playFor(who, newMenu);
+				}
+			});
 		});
 	}
 

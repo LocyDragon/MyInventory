@@ -20,7 +20,7 @@ public class CommandOpenInventory implements SubCmdRunner {
 
 	@Override
 	public void onSubCommand(SubCommandInfo info) {
-		if (info.args[0].equalsIgnoreCase(COMMAND_Prefix) && info.sender.isOp()) {
+		if (info.args[0].equalsIgnoreCase(COMMAND_Prefix) && info.sender.hasPermission("MyInventory.Open")) {
 			if (info.args.length != LENGTH_EXPECT) {
 				info.sender.sendMessage("§3[MyInventory] §e请使用/miv open [Gui界面名称] [玩家名称] ——为某个玩家打开一个界面");
 				return;

@@ -12,6 +12,7 @@ import com.locydragon.myinv.invcommand.subcmd.*;
 import com.locydragon.myinv.listeners.ClickParamSender;
 import com.locydragon.myinv.listeners.InventoryProtectListener;
 import com.locydragon.myinv.listeners.editor.EditorListener;
+import com.locydragon.myinv.metrics.MagicValue;
 import com.locydragon.myinv.metrics.Metrics;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -20,6 +21,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -43,6 +45,7 @@ public class MyInventory extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		loadDefault();
 		instance = this;
 		Main.registerCommands();
 		Main.infoMessage();
@@ -65,6 +68,7 @@ public class MyInventory extends JavaPlugin {
 		SubCommandBasic.addListener(new CommandInventoryInfoInventory());
 		SubCommandBasic.addListener(new CommandSetPeriodInventory());
 		SubCommandBasic.addListener(new CommandLoopInventory());
+		SubCommandBasic.addListener(new CommandScriptReloadInventory());
 		new Metrics(this);
 		useAudioBuffer = Bukkit.getPluginManager().getPlugin("AudioBuffer") != null;
 		if (useAudioBuffer) {
@@ -98,6 +102,9 @@ public class MyInventory extends JavaPlugin {
 		} else {
 			getLogger().info(">> 点券插件: PlayerPoints 不存在 挂钩失败");
 		}
+		getLogger().info(">> 正在启动自动保护线程.");
+		new AutoFixJob().runTaskTimer(this, 0, 20L);
+		getLogger().info(">> 启动完成.");
 	}
 
 	@Override
@@ -134,5 +141,32 @@ public class MyInventory extends JavaPlugin {
 			SlotScriptAche.putAll(result);
 		}
 		MyInventory.getInstance().getLogger().info(">> 加载了 "+amount+" 个脚本!");
+	}
+
+	private static void loadDefault() {
+		File scriptDir = new File(".//plugins//MyInventory//Scripts//TestScript.yml");
+		if (!scriptDir.exists()) {
+			scriptDir.getParentFile().mkdirs();
+			try {
+				scriptDir.createNewFile();
+				FileWriter writer = new FileWriter(scriptDir);
+				writer.write(MagicValue.MAGIC_VALUE_SCRIPT_DATA);
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		File menuDir = new File(".//plugins//MyInventory//Gui//test.yml");
+		if (!menuDir.exists()) {
+			menuDir.getParentFile().mkdirs();
+			try {
+				menuDir.createNewFile();
+				FileWriter writer = new FileWriter(menuDir);
+				writer.write(MagicValue.MAGIC_VALUE_MENU_DATA);
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

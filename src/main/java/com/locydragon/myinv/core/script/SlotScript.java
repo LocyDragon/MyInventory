@@ -187,20 +187,27 @@ public class SlotScript {
 		if (waitingQueue.contains(who.getName().toUpperCase())) {
 			return;
 		}
-		boolean reOpenMenu = containsType(JobCodeEnum.ASK);
-		if (reOpenMenu) {
-			who.closeInventory();
-			if (AnimatedFramePlayer.playerList.containsKey(who)) {
-				AnimatedFramePlayer.playerList.get(who).cancel();
-				AnimatedFramePlayer.playerList.remove(who);
-			}
-			if (AnimatedFramePlayer.openMenuTarget.containsKey(who)) {
-				AnimatedFramePlayer.openMenuTarget.remove(who);
-			}
-		}
 		threadPool.execute(() -> {
 			waitingQueue.add(who.getName().toUpperCase());
+			boolean closeInventory = false;
+			boolean isFirst = true;
+			boolean closedInventory[] = {false};
 			for (JobPerScript script : this.scripts) {
+				closeInventory = script.job == JobCodeEnum.ASK;
+				closedInventory[0] = closeInventory && isFirst;
+				if (closedInventory[0]) {
+					isFirst = false;
+					Bukkit.getScheduler().runTask(MyInventory.getInstance(), () -> {
+						who.closeInventory();
+						if (AnimatedFramePlayer.playerList.containsKey(who)) {
+							AnimatedFramePlayer.playerList.get(who).cancel();
+							AnimatedFramePlayer.playerList.remove(who);
+						}
+						if (AnimatedFramePlayer.openMenuTarget.containsKey(who)) {
+							AnimatedFramePlayer.openMenuTarget.remove(who);
+						}
+					});
+				}
 				script.done.set(false);
 				try {
 					script.run(who);
@@ -228,7 +235,7 @@ public class SlotScript {
 			}
 			waitingQueue.remove(who.getName().toUpperCase());
 			Bukkit.getScheduler().runTask(MyInventory.getInstance(), () -> {
-				if (reOpenMenu) {
+				if (closedInventory[0] && who.isOnline()) {
 					Menu newMenu = MyInventoryAPI.getMenu(fatherMenu.getMenuName());
 					AnimatedFramePlayer.playFor(who, newMenu);
 				}

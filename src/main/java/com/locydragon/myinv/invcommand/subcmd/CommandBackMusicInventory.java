@@ -23,7 +23,7 @@ public class CommandBackMusicInventory implements SubCmdRunner {
 	public void onSubCommand(SubCommandInfo info) {
 		if (info.args[0].equalsIgnoreCase(COMMAND_Prefix) && info.sender.isOp()) {
 			if (info.args.length != LENGTH_EXPECT) {
-				info.sender.sendMessage("§3[MyInventory] §e请使用/miv create [Gui界面名称] [音乐名称] ——给一个Gui界面添加一个音乐.Tip: 需要AudioBuffer插件支持.");
+				info.sender.sendMessage("§3[MyInventory] §e请使用/miv music [Gui界面名称] [音乐名称] ——给一个Gui界面添加一个音乐.Tip: 需要AudioBuffer插件支持.");
 				return;
 			}
 			String musicName = info.args[2];
